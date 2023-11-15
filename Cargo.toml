@@ -1,0 +1,15 @@
+[package]
+name = "gmx_rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+alloy-primitives = "0.4.2"
+alloy-sol-types = "0.4.2"
+alloy-sol-macro = "0.4.2"
+alloy-dyn-abi = "0.4.2"
+alloy-json-abi = "0.4.2"
+alloy-sol-type-parser = "0.4.2"
+syn-solidity = "0.4.2"
