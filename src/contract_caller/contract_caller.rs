@@ -1,17 +1,16 @@
 use alloy_json_abi::JsonAbi;
+use std::{fs::read_to_string, io};
 
-fn get_abi() {
-    let path = "GMX_Rust/src/contract_caller/abis/exchange_router_abi.json";
+pub fn get_abi() -> Result<JsonAbi, io::Error> {
+    let path: &str = "GMX_Rust/src/contract_caller/abis/exchange_router_abi.json";
 
-    match fs::read_to_string(path) {
-        Ok(json) => {
-            match serde_json::from_str::<JsonAbi>(&json) {
-                Ok(abi) => {
-                    // TODO
-                },
-                Err(e) => eprintln!("Failed to parse JSON: {}", e),
-            }
-        },
-        Err(e) => eprintln!("Failed to read file: {}", e),
+    let json: String = read_to_string(path)?;
+
+    match serde_json::from_str::<JsonAbi>(&json) {
+        Ok(abi) => Ok(abi),
+        Err(e) => {
+            eprintln!("Failed to parse JSON: {}", e);
+            Err(io::Error::new(io::ErrorKind::Other, "Failed to parse JSON"))
+        }
     }
 }

@@ -537,6 +537,7 @@ dependencies = [
  "alloy-sol-type-parser",
  "alloy-sol-types",
  "fs",
+ "serde_json",
  "syn-solidity",
 ]
 
