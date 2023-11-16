@@ -12,7 +12,7 @@ pub async fn connect_provider() -> Result<(), Box<dyn std::error::Error>> {
     
     let provider: Provider<Http> = Provider::<Http>::try_from(provider_url.as_str())?;
     let block_number: U64 = provider.get_block_number().await?;
-    println!("{block_number}");
+    println!("Connected to provider at block number: {block_number}");
 
     Ok(())
 }

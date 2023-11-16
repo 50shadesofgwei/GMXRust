@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tokio = { version = "1", features = ["full"] }
+dotenv = "0.15.0"
 alloy-primitives = "0.4.2"
 alloy-sol-types = "0.4.2"
 alloy-sol-macro = "0.4.2"

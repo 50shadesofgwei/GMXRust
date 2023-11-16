@@ -1,2 +1,2 @@
-pub mod contract_caller;
-pub mod contract_init;
+pub mod get_abi;
+pub mod connect_provider;
