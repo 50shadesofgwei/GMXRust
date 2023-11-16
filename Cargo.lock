@@ -1576,6 +1576,7 @@ dependencies = [
  "dotenv",
  "ethers",
  "fs",
+ "lazy_static",
  "serde_json",
  "syn-solidity",
  "tokio",
