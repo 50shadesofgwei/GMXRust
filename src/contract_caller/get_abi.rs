@@ -7,12 +7,7 @@ pub fn get_abi() -> Result<JsonAbi, io::Error> {
     let json: String = read_to_string(path)?;
 
     match serde_json::from_str::<JsonAbi>(&json) {
-        Ok(abi) => {
-            for item in abi.items() {
-                println!("{:?}", item);
-            }
-            Ok(abi)
-        },
+        Ok(abi) => Ok(abi),
         Err(e) => {
             eprintln!("Failed to parse JSON: {}", e);
             Err(io::Error::new(ErrorKind::InvalidData, "Failed to parse JSON"))
