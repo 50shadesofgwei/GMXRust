@@ -50,9 +50,9 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example vars
     // TODO: make these arguments passed to call builder func.
-    let wnt_amount: &str = "amount_in_wei_here";
+    let weth_amount: &str = "10000000000000000";
     let usdc_amount: &str = "10000000";
-    let deposit_params: &str = "/* create your deposit params here */";
+    let deposit_params: &str = "/* create deposit params here */";
 
 
 
@@ -61,17 +61,18 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     // --------------------------------------------------------- 
 
     let approve_tx = usdc_native_contract
-    .method::<_, ()>("approve", (router_address, usdc_amount))?
-    .send()
-    .await?;
+        .method::<_, ()>("approve", (router_address, usdc_amount))?
+        .send()
+        .await?;
 
     let send_wnt_data = exchange_router_contract
         .encode_function_data("sendWnt", (deposit_vault_address, wnt_amount))?;
 
 
+
     let function_name: &str = "multicall";
     let function_params = ();
-    let result: Address = contract.method(function_name, function_params)?.call().await?;
+    let result = exchange_router_contract.method(function_name, function_params)?.call().await?;
     let result_string: String = result.to_string();
     println!("{}", result_string);
 
