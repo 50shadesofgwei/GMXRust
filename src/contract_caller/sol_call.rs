@@ -57,16 +57,25 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
 
 
     // ---------------------------------------------------------
-    //                    Multicall Builder
-    // --------------------------------------------------------- 
+    // ------------------------------------------------------
+    //                   Multicall Builder
+    // ------------------------------------------------------
+    // ---------------------------------------------------------
 
-    let approve_tx = usdc_native_contract
-        .method::<_, ()>("approve", (router_address, usdc_amount))?
-        .send()
-        .await?;
+    // ----------------------------------
+    //            Tx1: Approve
+    // ----------------------------------
+
+    let approve_usdc = usdc_native_contract
+        .encode_function_data("approve", (router_address, usdc_amount))?;
+
 
     let send_wnt_data = exchange_router_contract
         .encode_function_data("sendWnt", (deposit_vault_address, wnt_amount))?;
+
+    // ----------------------------------
+    //         Tx2: Vault Deposit
+    // ----------------------------------
 
 
 
