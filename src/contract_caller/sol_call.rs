@@ -21,20 +21,20 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
 
     // Some necessary preamble for contract instances
     // Exchange Router
-    let exchange_router_address_str: String = "0x7C68C7866A64FA2160F78EEaE12217FFbf871fa8".to_string();
+    let exchange_router_address_str: String = "0xFE98518C9c8F1c5a216E999816c2dE3199f295D2".to_string();
     let exchange_router_address: H160 = exchange_router_address_str.parse()?;
 
     // USDC (Native)
-    let usdc_native_address_str: String = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831".to_string();
+    let usdc_native_address_str: String = "0x04FC936a15352a1b15b3B9c56EA002051e3DB3e5".to_string();
     let usdc_native_address: H160 = usdc_native_address_str.parse()?;
 
     // Vault
-    let vault_address_str: String = "0x489ee077994B6658eAfA855C308275EAd8097C4A".to_string();
+    let vault_address_str: String = "0x82aFd2590814a7Ce3d7ea6b63F80481F8b227bA9".to_string();
     let vault_address: H160 = vault_address_str.parse()?;
 
-    // WETH (WNT)
-    let weth_address_str: String = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".to_string();
-    let weth_address: H160 = weth_address_str.parse()?;
+    // // WETH (WNT)
+    // let weth_address_str: String = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".to_string();
+    // let weth_address: H160 = weth_address_str.parse()?;
 
 
     // Initialise providers
@@ -69,13 +69,12 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     let approve_usdc = usdc_native_contract
         .encode_function_data("approve", (router_address, usdc_amount))?;
 
-
-    let send_wnt_data = exchange_router_contract
-        .encode_function_data("sendWnt", (deposit_vault_address, wnt_amount))?;
-
     // ----------------------------------
     //         Tx2: Vault Deposit
     // ----------------------------------
+
+    let deposit_colleratal = exchange_router_contract
+        .encode_function_data("approve", (router_address, usdc_amount))?;
 
 
 
