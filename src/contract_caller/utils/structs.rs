@@ -60,18 +60,6 @@ pub fn struct_builder() {
     }
     
     sol! {
-        struct CreateOrderParams {
-            CreateOrderParamsAddresses addresses;
-            CreateOrderParamsNumbers numbers;
-            Order.OrderType orderType;
-            Order.DecreasePositionSwapType decreasePositionSwapType;
-            bool isLong;
-            bool shouldUnwrapNativeToken;
-            bytes32 referralCode;
-        }
-    }
-    
-    sol! {
         struct CreateOrderParamsAddresses {
             address receiver;
             address callbackContract;

@@ -4,6 +4,8 @@ use dotenv::dotenv;
 use std::env;
 use std::sync::Arc;
 
+use crate::contract_caller::utils::structs::{AddressesStruct, NumbersStruct};
+
 // Create contract instances from abis w/ abigen
 abigen!{ 
     EXCHANGE_ROUTER, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/exchange_router_abi.json";
@@ -76,6 +78,38 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     let deposit_colleratal = exchange_router_contract
         .encode_function_data("approve", (router_address, usdc_amount))?;
 
+    // ----------------------------------
+    //         Tx3: Create Order
+    // ----------------------------------
+
+    // Structure the input for 'createOrder'
+let addresses: AddressesStruct = AddressesStruct {
+    receiver: "0x1f13a5dc44911ebd98ea1b55ab5b7b2a99acca14".parse()?,
+    callback_contract: "0x0000000000000000000000000000000000000000".parse()?,
+    ui_fee_receiver: "0x0000000000000000000000000000000000000000".parse()?,
+    market: "0x70d95587d40a2caf56bd97485ab3eec10bee6336".parse()?,
+    initial_collateral_token: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1".parse()?,
+    swap_path: vec!["0x6853ea96ff216fab11d2d930ce3c508556a4bdc4".parse()?],
+};
+
+let numbers = NumbersStruct {
+    size_delta_usd: U256::from_dec_str("2431245426638617490489280000000000")?,
+    initial_collateral_delta_amount: U256::from(0),
+    trigger_price: U256::from(0),
+    acceptable_price: U256::from_dec_str("1975900891694612")?,
+    execution_fee: U256::from_dec_str("1292500000000000")?,
+    callback_gas_limit: U256::from(0),
+    min_output_amount: U256::from(0),
+};
+
+let order_type: i32 = 2;
+let decrease_position_swap_type: i32 = 0;
+let is_long: bool = true;
+let should_unwrap_native_token: bool = true;
+let referral_code: [u8; 32] = [0u8; 32]; // Assuming 32-byte zero array
+
+// Encode 'createOrder' call
+let create_order_payload = exchange_router_contract.method::<_, Bytes>("createOrder", (addresses, numbers, order_type, decrease_position_swap_type, is_long, should_unwrap_native_token, referral_code))?.calldata().await?;
 
 
     let function_name: &str = "multicall";
