@@ -1,4 +1,26 @@
 use alloy_sol_types::sol;
+use ethers::prelude::*;
+
+// Struct for 'addresses' parameter in 'createOrder'
+pub struct AddressesStruct {
+    pub receiver: Address,
+    pub callback_contract: Address,
+    pub ui_fee_receiver: Address,
+    pub market: Address,
+    pub initial_collateral_token: Address,
+    pub swap_path: Vec<Address>,
+}
+
+// Struct for 'numbers' parameter in 'createOrder'
+pub struct NumbersStruct {
+    pub size_delta_usd: U256,
+    pub initial_collateral_delta_amount: U256,
+    pub trigger_price: U256,
+    pub acceptable_price: U256,
+    pub execution_fee: U256,
+    pub callback_gas_limit: U256,
+    pub min_output_amount: U256,
+}
 
 
 pub fn struct_builder() {
