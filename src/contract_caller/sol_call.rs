@@ -49,11 +49,10 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     // Create contract instances
     let exchange_router_contract: EXCHANGE_ROUTER<_> = EXCHANGE_ROUTER::new(exchange_router_address, provider.clone());
     let usdc_native_contract: USDC_NATIVE<Provider<Http>> = USDC_NATIVE::new(usdc_native_address, provider.clone());
-    let vault_contract: VAULT<_> = VAULT::new(vault_address, provider.clone());
+    // let vault_contract: VAULT<_> = VAULT::new(vault_address, provider.clone());
 
     // Example vars
     // TODO: make these arguments passed to call builder func.
-    let weth_amount: &str = "10000000000000000";
     let usdc_amount_str: &str = "10000000";
     let usdc_amount: U256 = U256::from_dec_str(usdc_amount_str)
         .expect("Invalid number format for USDC amount");
@@ -131,7 +130,8 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     // ----------------------------------
 
     let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
-    let bundle_executor = exchange_router_contract.multicall(bundle).call().await?;
+    let multicall_tx_builder = exchange_router_contract.multicall(bundle);
+    let multicall_tx = multicall_tx_builder.send().await?;
 
     Ok(())
 }
