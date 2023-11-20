@@ -1,4 +1,4 @@
-use alloy_primitives::{address, fixed_bytes, Address, FixedBytes, I256, U256};
+use alloy_primitives::Address;
 use lazy_static::lazy_static;
 
 const USDC_STR: &str = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
