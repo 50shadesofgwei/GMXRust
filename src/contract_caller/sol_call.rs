@@ -5,7 +5,7 @@ use dotenv::dotenv;
 use std::env;
 use std::sync::Arc;
 
-use crate::contract_caller::utils::structs::{AddressesStruct, NumbersStruct};
+use crate::contract_caller::sol_call::exchange_router::{CreateOrderParamsAddresses, CreateOrderParamsNumbers};
 
 // Create contract instances from abis w/ abigen
 abigen!{ 
@@ -70,7 +70,7 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     //            Tx1: Approve
     // ----------------------------------
 
-    let tx1_builder: ContractCall<Provider<Http>, bool> = usdc_native_contract.approve(exchange_router_address, usdc_amount);
+    let tx1_builder = usdc_native_contract.approve(exchange_router_address, usdc_amount);
     let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
     
     // ----------------------------------
@@ -80,47 +80,58 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     let token_reciever_address_str: String = "0x31ef83a530fde1b38ee9a18093a333d8bbbc40d5".to_string();
     let token_reciever_address: H160 = token_reciever_address_str.parse()?;
     let tx2_builder = exchange_router_contract.send_tokens(usdc_native_address, token_reciever_address, usdc_amount);
-    let tx2_bytes = tx2_builder.calldata().unwrap();
+    let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
 
     // ----------------------------------
     //         Tx3: Create Order
     // ----------------------------------
 
     // Structure the input for 'createOrder'
-let addresses: AddressesStruct = AddressesStruct {
-    receiver: "0x1f13a5dc44911ebd98ea1b55ab5b7b2a99acca14".parse()?,
-    callback_contract: "0x0000000000000000000000000000000000000000".parse()?,
-    ui_fee_receiver: "0x0000000000000000000000000000000000000000".parse()?,
-    market: "0x70d95587d40a2caf56bd97485ab3eec10bee6336".parse()?,
-    initial_collateral_token: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1".parse()?,
-    swap_path: vec!["0x6853ea96ff216fab11d2d930ce3c508556a4bdc4".parse()?],
-};
+    let addresses: CreateOrderParamsAddresses = CreateOrderParamsAddresses {
+        receiver: "0xa6d1feda6fc70680816ef6a23faf5e454e2f9c09".parse()?,
+        callback_contract: "0x0000000000000000000000000000000000000000".parse()?,
+        ui_fee_receiver: "0x0000000000000000000000000000000000000000".parse()?,
+        market: "0x70d95587d40a2caf56bd97485ab3eec10bee6336".parse()?,
+        initial_collateral_token: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1".parse()?,
+        swap_path: vec!["0x6853ea96ff216fab11d2d930ce3c508556a4bdc4".parse()?],
+    };
 
-let numbers: NumbersStruct = NumbersStruct {
-    size_delta_usd: U256::from_dec_str("2431245426638617490489280000000000")?,
-    initial_collateral_delta_amount: U256::from(0),
-    trigger_price: U256::from(0),
-    acceptable_price: U256::from_dec_str("1975900891694612")?,
-    execution_fee: U256::from_dec_str("1292500000000000")?,
-    callback_gas_limit: U256::from(0),
-    min_output_amount: U256::from(0),
-};
+    let numbers: CreateOrderParamsNumbers = CreateOrderParamsNumbers {
+        size_delta_usd: U256::from_dec_str("2431245426638617490489280000000000")?,
+        initial_collateral_delta_amount: U256::from(0),
+        trigger_price: U256::from(0),
+        acceptable_price: U256::from_dec_str("1975900891694612")?,
+        execution_fee: U256::from_dec_str("1292500000000000")?,
+        callback_gas_limit: U256::from(0),
+        min_output_amount: U256::from(0),
+    };
 
-let order_type: i32 = 2;
-let decrease_position_swap_type: i32 = 0;
-let is_long: bool = true;
-let should_unwrap_native_token: bool = true;
-let referral_code: [u8; 32] = [0u8; 32]; // Assuming 32-byte zero array
+    let order_type: u8 =  u8::from(2);
+    let decrease_position_swap_type: u8 = u8::from(0);
+    let is_long: bool = true;
+    let should_unwrap_native_token: bool = true;
+    let referral_code: [u8; 32] = [0u8; 32]; // Assuming 32-byte zero array i.e. no refferal code
 
-// Encode 'createOrder' call
-let create_order_payload = exchange_router_contract.method::<_, Bytes>("createOrder", (addresses, numbers, order_type, decrease_position_swap_type, is_long, should_unwrap_native_token, referral_code))?.calldata().await?;
+    let create_order_object: CreateOrderParams = CreateOrderParams {
+        addresses,
+        numbers,
+        order_type,
+        decrease_position_swap_type,
+        is_long,
+        should_unwrap_native_token,
+        referral_code,
+    };
+
+    let tx3_builder = exchange_router_contract.create_order(create_order_object);
+    let tx3_bytes: Bytes = tx3_builder.calldata().unwrap();
 
 
-    let function_name: &str = "multicall";
-    let function_params = ();
-    let result = exchange_router_contract.method(function_name, function_params)?.call().await?;
-    let result_string: String = result.to_string();
-    println!("{}", result_string);
+    // ----------------------------------
+    //      Bundling & Tx Execution 
+    // ----------------------------------
+
+    let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
+    let bundle_executor = exchange_router_contract.multicall(bundle).call().await?;
 
     Ok(())
 }
