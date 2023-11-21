@@ -15,7 +15,7 @@ abigen!{
     WETH, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/weth_abi.json";
 }
 
-pub async fn sol_call(order_params: OrderObject) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     // ---------------------------------------------------------
@@ -51,11 +51,50 @@ pub async fn sol_call(order_params: OrderObject) -> Result<(), Box<dyn std::erro
     let usdc_native_contract: USDC_NATIVE<Provider<Http>> = USDC_NATIVE::new(usdc_native_address, provider.clone());
     // let vault_contract: VAULT<_> = VAULT::new(vault_address, provider.clone());
 
-    // Example vars
-    // TODO: make these into arguments passed to call builder func.
-    let usdc_amount_str: &str = "10000000";
-    let usdc_amount: U256 = U256::from_dec_str(usdc_amount_str)
-        .expect("Invalid number format for USDC amount");
+    // Parse number values to U256
+    let amount_u256: U256 = order_object.amount.parse()?;
+    let size_delta_usd: U256 = order_object.size_delta_usd.parse()?;
+    let initial_collateral_delta_amount: U256 = order_object.initial_collateral_delta_amount.parse()?;
+    let trigger_price: U256 = order_object.trigger_price.parse()?;
+    let acceptable_price: U256 = order_object.acceptable_price.parse()?;
+    let execution_fee: U256 = order_object.execution_fee.parse()?;
+    let callback_gas_limit: U256 = order_object.callback_gas_limit.parse()?;
+    let min_output_amount: U256 = order_object.min_output_amount.parse()?;
+
+    // Parse addresses
+    let receiver: Address = order_object.receiver.parse()?;
+    let callback_contract: Address = order_object.callback_contract.parse()?;
+    let ui_fee_receiver: Address = order_object.ui_fee_receiver.parse()?;
+    let market: Address = order_object.market.parse()?;
+    let initial_collateral_token: Address = order_object.initial_collateral_token.parse()?;
+    let swap_path: Vec<Address> = order_object.swap_path.iter().map(|s| s.parse()).collect::<Result<_, _>>()?;
+
+    // Create the order object to be submitted to the chain
+    let create_order_object: CreateOrderParams = CreateOrderParams {
+        addresses: CreateOrderParamsAddresses {
+            receiver,
+            callback_contract,
+            ui_fee_receiver,
+            market,
+            initial_collateral_token,
+            swap_path,
+        },
+        numbers: CreateOrderParamsNumbers {
+            size_delta_usd,
+            initial_collateral_delta_amount,
+            trigger_price,
+            acceptable_price,
+            execution_fee,
+            callback_gas_limit,
+            min_output_amount,
+        },
+        order_type: order_object.order_type,
+        decrease_position_swap_type: order_object.decrease_position_swap_type,
+        is_long: order_object.is_long,
+        should_unwrap_native_token: order_object.should_unwrap_native_token,
+        referral_code: order_object.referral_code,
+    };
+
 
     // Build local wallet
     let wallet = get_local_signer();

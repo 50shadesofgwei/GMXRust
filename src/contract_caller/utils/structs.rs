@@ -35,6 +35,23 @@ pub struct OrderObject {
     pub is_long: bool,
     pub position_asset: String,
     pub amount: String,
+    pub receiver: String,
+    pub callback_contract: String,
+    pub ui_fee_receiver: String,
+    pub market: String,
+    pub initial_collateral_token: String,
+    pub swap_path: Vec<String>,
+    pub size_delta_usd: String,
+    pub initial_collateral_delta_amount: String,
+    pub trigger_price: String,
+    pub acceptable_price: String,
+    pub execution_fee: String,
+    pub callback_gas_limit: String,
+    pub min_output_amount: String,
+    pub order_type: u8,
+    pub decrease_position_swap_type: u8,
+    pub should_unwrap_native_token: bool,
+    pub referral_code: [u8; 32],
 }
 
 pub enum OrderType {
