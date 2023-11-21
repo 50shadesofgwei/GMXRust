@@ -31,6 +31,12 @@ pub struct CreateOrderStruct {
         referral_code: [u8; 32],
 }
 
+pub enum Markets {
+    WETHUSDC,
+    
+
+}
+
 pub struct OrderObject {
     pub is_long: bool,
     pub position_asset: String,
@@ -134,3 +140,12 @@ impl Token {
         }
     }
 }
+
+pub struct SimpleOrder {
+    pub is_long: bool,
+    pub index_token: String,
+    pub amount: String,
+    pub collateral_token: String,
+    pub leverage_factor: f32,
+}
+

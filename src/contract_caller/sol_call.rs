@@ -134,11 +134,11 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //      Bundling & Tx Execution 
     // ----------------------------------
 
-    let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
-    let multicall_tx_call = exchange_router_contract.multicall(bundle);
+    // let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
+    // let multicall_tx_call = exchange_router_contract.multicall(bundle);
 
-    // Sign and send the transaction directly using the wallet
-    let receipt = multicall_tx_call.send().await?;
+    // // Sign and send the transaction directly using the wallet
+    // let receipt = multicall_tx_call.send().await?;
 
     Ok(())
 }
