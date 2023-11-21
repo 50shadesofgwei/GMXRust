@@ -1,11 +1,8 @@
-use alloy_sol_types::abi::token;
 use ethers::prelude::*;
 use ethers::types::{H160, Address, U256};
 use dotenv::dotenv;
 use std::env;
 use std::sync::Arc;
-
-use crate::contract_caller::sol_call::exchange_router::{CreateOrderParamsAddresses, CreateOrderParamsNumbers};
 
 // Create contract instances from abis w/ abigen
 abigen!{ 
@@ -52,7 +49,7 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     // let vault_contract: VAULT<_> = VAULT::new(vault_address, provider.clone());
 
     // Example vars
-    // TODO: make these arguments passed to call builder func.
+    // TODO: make these into arguments passed to call builder func.
     let usdc_amount_str: &str = "10000000";
     let usdc_amount: U256 = U256::from_dec_str(usdc_amount_str)
         .expect("Invalid number format for USDC amount");
