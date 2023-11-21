@@ -33,6 +33,7 @@ pub struct CreateOrderStruct {
 
 pub enum Markets {
     WETHUSDC,
+    WBTCUSDC,
     
 
 }
