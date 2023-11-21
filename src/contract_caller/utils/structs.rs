@@ -78,9 +78,9 @@ pub struct TokenInfo {
 }
 
 pub enum Token {
-    ETH,
     WETH,
     BTC,
+    WBTC,
     LINK,
     ARB,
     SOL,
@@ -97,16 +97,16 @@ pub enum Token {
 impl Token {
     pub fn info(&self) -> TokenInfo {
         match self {
-            Token::ETH => TokenInfo { name: "ETH", address: "0x...EthAddress...", decimals: 18 },
             Token::WETH => TokenInfo { name: "WETH", address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", decimals: 18 },
-            Token::BTC => TokenInfo { name: "BTC", address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", decimals: 8 },
+            Token::BTC => TokenInfo { name: "BTC", address: "0x47904963fc8b2340414262125aF798B9655E58Cd", decimals: 8 }, // Synthetic
+            Token::WBTC => TokenInfo { name: "WBTC", address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", decimals: 8 },
             Token::LINK => TokenInfo { name: "LINK", address: "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4", decimals: 18 },
             Token::ARB => TokenInfo { name: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 },
-            Token::SOL => TokenInfo { name: "SOL", address: "0x...SolAddress...", decimals: 9 },
+            Token::SOL => TokenInfo { name: "SOL", address: "0x2bcC6D6CdBbDC0a4071e48bb3B969b06B3330c07", decimals: 9 },
             Token::UNI => TokenInfo { name: "UNI", address: "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0", decimals: 18 },
-            Token::XRP => TokenInfo { name: "XRP", address: "0x...XrpAddress...", decimals: 6 },
-            Token::DOGE => TokenInfo { name: "DOGE", address: "0x...DogeAddress...", decimals: 8 },
-            Token::LTC => TokenInfo { name: "LTC", address: "0x...LtcAddress...", decimals: 8 },
+            Token::XRP => TokenInfo { name: "XRP", address: "0xc14e065b0067dE91534e032868f5Ac6ecf2c6868", decimals: 6 }, // Synthetic
+            Token::DOGE => TokenInfo { name: "DOGE", address: "0xC4da4c24fd591125c3F47b340b6f4f76111883d8", decimals: 8 }, // Synthetic
+            Token::LTC => TokenInfo { name: "LTC", address: "0xB46A094Bc4B0adBD801E14b9DB95e05E28962764", decimals: 8 }, // Synthetic
             Token::USDC => TokenInfo { name: "USDC", address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", decimals: 6 },
             Token::USDCE => TokenInfo { name: "USDCE", address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", decimals: 6 },
             Token::DAI => TokenInfo { name: "DAI", address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
@@ -116,8 +116,9 @@ impl Token {
 
     pub fn from_name(name: &str) -> Option<Token> {
         match name {
-            "ETH" => Some(Token::ETH),
+            "WETH" => Some(Token::WETH),
             "BTC" => Some(Token::BTC),
+            "WBTC" => Some(Token::WBTC),
             "LINK" => Some(Token::LINK),
             "ARB" => Some(Token::ARB),
             "SOL" => Some(Token::SOL),

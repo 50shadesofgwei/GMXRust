@@ -110,17 +110,17 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //            Tx1: Approve
     // ----------------------------------
 
-    let tx1_builder = usdc_native_contract.approve(exchange_router_address, usdc_amount);
-    let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
+    // let tx1_builder = usdc_native_contract.approve(exchange_router_address, usdc_amount);
+    // let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
     
     // ----------------------------------
     //         Tx2: Vault Deposit
     // ----------------------------------
 
-    let token_reciever_address_str: String = "0x31ef83a530fde1b38ee9a18093a333d8bbbc40d5".to_string();
-    let token_reciever_address: H160 = token_reciever_address_str.parse()?;
-    let tx2_builder = exchange_router_contract.send_tokens(usdc_native_address, token_reciever_address, usdc_amount);
-    let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
+    // let token_reciever_address_str: String = "0x31ef83a530fde1b38ee9a18093a333d8bbbc40d5".to_string();
+    // let token_reciever_address: H160 = token_reciever_address_str.parse()?;
+    // let tx2_builder = exchange_router_contract.send_tokens(usdc_native_address, token_reciever_address, usdc_amount);
+    // let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
 
     // ----------------------------------
     //         Tx3: Create Order
