@@ -4,6 +4,8 @@ use dotenv::dotenv;
 use std::env;
 use std::sync::Arc;
 
+use super::utils::local_signer::get_local_signer;
+
 // Create contract instances from abis w/ abigen
 abigen!{ 
     EXCHANGE_ROUTER, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/exchange_router_abi.json";
@@ -54,6 +56,8 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     let usdc_amount: U256 = U256::from_dec_str(usdc_amount_str)
         .expect("Invalid number format for USDC amount");
 
+    // Build local wallet
+    let wallet = get_local_signer();
 
 
     // ---------------------------------------------------------
@@ -127,8 +131,10 @@ pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
     // ----------------------------------
 
     let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
-    let multicall_tx_builder = exchange_router_contract.multicall(bundle);
-    let multicall_tx = multicall_tx_builder.send().await?;
+    let multicall_tx_call = exchange_router_contract.multicall(bundle);
+
+    // Sign and send the transaction directly using the wallet
+    let receipt = multicall_tx_call.send().await?;
 
     Ok(())
 }
