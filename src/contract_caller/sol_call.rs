@@ -5,6 +5,7 @@ use std::env;
 use std::sync::Arc;
 
 use super::utils::local_signer::get_local_signer;
+use super::utils::structs::OrderObject;
 
 // Create contract instances from abis w/ abigen
 abigen!{ 
@@ -14,7 +15,7 @@ abigen!{
     WETH, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/weth_abi.json";
 }
 
-pub async fn sol_call() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn sol_call(order_params: OrderObject) -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     // ---------------------------------------------------------

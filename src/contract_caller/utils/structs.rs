@@ -31,6 +31,12 @@ pub struct CreateOrderStruct {
         referral_code: [u8; 32],
 }
 
+pub struct OrderObject {
+    pub is_long: bool,
+    pub position_asset: String,
+    pub amount: String,
+}
+
 pub enum OrderType {
     MarketSwap,
     LimitSwap,
