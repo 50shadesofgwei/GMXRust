@@ -188,9 +188,9 @@ impl Default for OrderObject {
 }
 
 pub struct TokenInfo {
-    name: &'static str,
-    address: &'static str,
-    decimals: u8,
+    pub name: &'static str,
+    pub address: &'static str,
+    pub decimals: u8,
 }
 
 pub enum Token {
@@ -259,3 +259,19 @@ pub struct SimpleOrder {
     pub leverage_factor: f32,
 }
 
+pub struct OrderCalcInput {
+    pub collateral_token: String,
+    pub index_token: String,
+    pub collateral_amount: String, 
+    pub leverage_factor: f32,
+}
+
+pub struct OrderCalcOutput {
+    pub collateral_amount: U256,
+    pub size_delta_usd: U256,
+    pub initial_collateral_delta_amount: U256,
+    pub trigger_price: U256,
+    pub acceptable_price: U256,
+    pub execution_fee: U256,
+    pub min_output_amount: U256,
+}
