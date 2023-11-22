@@ -160,6 +160,33 @@ pub enum DecreasePositionSwapType {
     SwapCollateralTokenToPnlToken
 }
 
+impl Default for OrderObject {
+    fn default() -> Self {
+        OrderObject {
+            is_long: true,
+            position_asset: "".to_string(),
+            amount: "".to_string(),
+            receiver: "".to_string(),
+            callback_contract: "0x0000000000000000000000000000000000000000".to_string(),
+            ui_fee_receiver: "0x0000000000000000000000000000000000000000".to_string(),
+            market: "0x0000000000000000000000000000000000000000".to_string(),
+            initial_collateral_token: "0x0000000000000000000000000000000000000000".to_string(),
+            swap_path: Vec::new(),
+            size_delta_usd: "".to_string(),
+            initial_collateral_delta_amount: "".to_string(),
+            trigger_price: "".to_string(),
+            acceptable_price: "".to_string(),
+            execution_fee: "".to_string(),
+            callback_gas_limit: "".to_string(),
+            min_output_amount: "".to_string(),
+            order_type: 0,
+            decrease_position_swap_type: 0,
+            should_unwrap_native_token: false,
+            referral_code: [0; 32],
+        }
+    }
+}
+
 pub struct TokenInfo {
     name: &'static str,
     address: &'static str,
