@@ -31,12 +31,94 @@ pub struct CreateOrderStruct {
         referral_code: [u8; 32],
 }
 
-pub enum Markets {
-    WETHUSDC,
-    WBTCUSDC,
-    
-
+pub struct MarketInfo {
+    market: String,
+    market_address: String,
+    is_synthetic: Option<bool>,
 }
+
+pub enum Markets {
+    WETH,
+    WBTC,
+    DOGE,
+    SOL,
+    LTC,
+    UNI,
+    LINK,
+    ARB,
+    USDCE,
+    USDT,
+    DAI,
+    XRP,
+}
+
+impl Markets {
+    pub fn info(&self) -> MarketInfo {
+        match self {
+            Markets::WETH => MarketInfo {
+                market: "WETH".to_string(),
+                market_address: "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::WBTC => MarketInfo {
+                market: "WBTC".to_string(),
+                market_address: "0x47c031236e19d024b42f8AE6780E44A573170703".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::DOGE => MarketInfo {
+                market: "DOGE".to_string(),
+                market_address: "0x6853EA96FF216fAb11D2d930CE3C508556A4bdc4".to_string(),
+                is_synthetic: Some(true),
+            },
+            Markets::SOL => MarketInfo {
+                market: "SOL".to_string(),
+                market_address: "0x09400D9DB990D5ed3f35D7be61DfAEB900Af03C9".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::LTC => MarketInfo {
+                market: "LTC".to_string(),
+                market_address: "0xD9535bB5f58A1a75032416F2dFe7880C30575a41".to_string(),
+                is_synthetic: Some(true),
+            },
+            Markets::UNI => MarketInfo {
+                market: "UNI".to_string(),
+                market_address: "0xc7Abb2C5f3BF3CEB389dF0Eecd6120D451170B50".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::LINK => MarketInfo {
+                market: "LINK".to_string(),
+                market_address: "0x7f1fa204bb700853D36994DA19F830b6Ad18455C".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::ARB => MarketInfo {
+                market: "ARB".to_string(),
+                market_address: "0xC25cEf6061Cf5dE5eb761b50E4743c1F5D7E5407".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::USDCE => MarketInfo {
+                market: "USDCE".to_string(),
+                market_address: "0x9C2433dFD71096C435Be9465220BB2B189375eA7".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::USDT => MarketInfo {
+                market: "USDT".to_string(),
+                market_address: "0xB686BcB112660343E6d15BDb65297e110C8311c4".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::DAI => MarketInfo {
+                market: "DAI".to_string(),
+                market_address: "0xe2fEDb9e6139a182B98e7C2688ccFa3e9A53c665".to_string(),
+                is_synthetic: Some(false),
+            },
+            Markets::XRP => MarketInfo {
+                market: "XRP".to_string(),
+                market_address: "0x0CCB4fAa6f1F1B30911619f1184082aB4E25813c".to_string(),
+                is_synthetic: Some(true),
+            },
+        }
+    }
+}
+
 
 pub struct OrderObject {
     pub is_long: bool,
