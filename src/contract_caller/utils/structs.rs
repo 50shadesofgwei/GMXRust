@@ -1,4 +1,5 @@
 use ethers::prelude::*;
+use serde::Deserialize;
 
 // Struct for 'addresses' parameter in 'createOrder'
 pub struct CreateOrderParamsAddresses {
@@ -274,4 +275,37 @@ pub struct OrderCalcOutput {
     pub acceptable_price: U256,
     pub execution_fee: U256,
     pub min_output_amount: U256,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct PriceData {
+    pub id: String,
+    pub min_block_number: Option<u64>,
+    pub min_block_hash: Option<String>,
+    pub oracle_decimals: Option<u8>,
+    pub token_symbol: String,
+    pub token_address: String,
+    pub min_price: Option<String>,
+    pub max_price: Option<String>,
+    pub signer: Option<String>,
+    pub signature: Option<String>,
+    pub signature_without_block_hash: Option<String>,
+    pub created_at: Option<String>,
+    pub min_block_timestamp: Option<u64>,
+    pub oracle_keeper_key: Option<String>,
+    pub max_block_timestamp: Option<u64>,
+    pub max_block_number: Option<u64>,
+    pub max_block_hash: Option<String>,
+    pub max_price_full: Option<String>,
+    pub min_price_full: Option<String>,
+    pub oracle_keeper_record_id: Option<String>,
+    pub oracle_keeper_fetch_type: Option<String>,
+    pub oracle_type: Option<String>,
+    pub blob: Option<String>,
+}
+
+pub struct TokenPriceFromApiResponse {
+    pub token_symbol: String,
+    pub min_price_full: String,
+    pub max_price_full: String,
 }
