@@ -6,33 +6,22 @@ use crate::contract_caller::utils::gas_calculator::calculate_execution_fee;
 
 pub async fn calculate_order_params(input: OrderCalcInput) -> Result<OrderCalcOutput, Box<dyn std::error::Error>> {
 
-    let mut price_output: TokenPriceFromApiResponse;
+    let price_output: TokenPriceFromApiResponse;
     let initial_collateral_delta_amount: U256 = U256::from(0);
     let trigger_price: U256 = U256::from(0);
-    let mut execution_fee: U256 = U256::from(0);
-    let mut min_output_amount: U256 = U256::from(0);
+    let min_output_amount: U256 = U256::from(0);
 
     let estimated_gas: u64 = 2500000;
-
 
 
     // Fetch the decimals for the collateral/index tokens
     let collateral_info: TokenInfo = Token::from_name(&input.collateral_token)
         .ok_or("Unsupported token")?
         .info();
-    let collateral_decimals: u8 = collateral_info.decimals;
 
     let index_info: TokenInfo = Token::from_name(&input.index_token)
         .ok_or("Unsupported token")?
         .info();
-    let index_decimals: u8 = index_info.decimals;
-
-    if input.collateral_token != input.index_token {
-        price_output = fetch_token_price(input.index_token.clone()).await?;
-    } else {
-        // Handle the case where collateral token is the same as index token
-        price_output = fetch_token_price(input.collateral_token.clone()).await?;
-    }
 
     // Convert and adjust collateral amount
     let collateral_amount_raw: U256 = U256::from_dec_str(&input.collateral_amount)?;
@@ -53,7 +42,7 @@ pub async fn calculate_order_params(input: OrderCalcInput) -> Result<OrderCalcOu
         .ok_or("Decimal adjustment error for size in USD")?;
 
     // Execution fee calcs
-    execution_fee = calculate_execution_fee(estimated_gas).await?;
+    let execution_fee = calculate_execution_fee(estimated_gas).await?;
 
 
     // Create and return the OrderObject with calculated values
