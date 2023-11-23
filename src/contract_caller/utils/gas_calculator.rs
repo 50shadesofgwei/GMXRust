@@ -7,16 +7,20 @@ pub async fn calculate_execution_fee(gas_estimate: u64) -> Result<u64, Box<dyn s
     let current_gas_price: U256 = get_current_gas_price().await?;
 
     // Calculate the execution fee
-    let execution_fee = gas_estimate * current_gas_price;
+    let execution_fee: U256 = current_gas_price.checked_mul(U256::from(gas_estimate))
+        .ok_or_else(|| "Execution fee overflow")?;
 
-    Ok(execution_fee)
+    // Convert U256 to u64 safely
+    let execution_fee_u64: u64 = execution_fee.low_u64(); // Use low_u64 for values that fit into u64
+
+    Ok(execution_fee_u64)
 }
 
 async fn get_current_gas_price() -> Result<U256, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let url = "https://eth-mainnet.alchemyapi.io/v2/yourAlchemyApiKey/eth_gasPrice";
 
-    let response = client.get(url).send().await?;
+    let response: reqwest::Response = client.get(url).send().await?;
     let gas_price_response: GasPriceResponse = response.json().await?;
 
     // Convert the hex gas price to U256
