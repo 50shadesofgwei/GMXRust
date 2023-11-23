@@ -1,23 +1,17 @@
-use crate::contract_caller::utils::structs::{TokenPriceFromApiResponse, PriceData};
+use crate::contract_caller::utils::structs::{TokenPriceFromApiResponse, ApiResponse};
 use reqwest;
 
 pub async fn fetch_token_price(index_token: String) -> Result<TokenPriceFromApiResponse, Box<dyn std::error::Error>> {
-    let response: Vec<PriceData> = reqwest::get("https://arbitrum-api.gmxinfra.io/signed_prices/latest")
-        .await?
-        .json::<Vec<PriceData>>()
-        .await?;
+    let url: &str = "https://arbitrum-api.gmxinfra.io/signed_prices/latest";
+    let response: ApiResponse = reqwest::get(url).await?.json().await?;
 
-    for price_data in response {
+    println!("Searching for token: {}", index_token);
+
+    // Find the relevant price data for the specified token
+    for price_data in response.signed_prices {
         if price_data.token_symbol == index_token {
-            let min_price = price_data.min_price_full
-                .as_ref()
-                .and_then(|p| p.parse::<String>().ok())
-                .ok_or("Failed to parse min_price_full")?;
-
-            let max_price = price_data.max_price_full
-                .as_ref()
-                .and_then(|p| p.parse::<String>().ok())
-                .ok_or("Failed to parse max_price_full")?;
+            let min_price = price_data.min_price_full.unwrap_or_default();
+            let max_price = price_data.max_price_full.unwrap_or_default();
 
             return Ok(TokenPriceFromApiResponse {
                 token_symbol: price_data.token_symbol,

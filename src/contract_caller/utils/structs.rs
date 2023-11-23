@@ -1,5 +1,5 @@
 use ethers::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize};
 
 // Struct for 'addresses' parameter in 'createOrder'
 pub struct CreateOrderParamsAddresses {
@@ -39,7 +39,7 @@ pub struct MarketInfo {
 }
 
 pub enum Markets {
-    WETH,
+    ETH,
     WBTC,
     DOGE,
     SOL,
@@ -56,8 +56,8 @@ pub enum Markets {
 impl Markets {
     pub fn info(&self) -> MarketInfo {
         match self {
-            Markets::WETH => MarketInfo {
-                market: "WETH".to_string(),
+            Markets::ETH => MarketInfo {
+                market: "ETH".to_string(),
                 market_address: "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336".to_string(),
                 is_synthetic: Some(false),
             },
@@ -195,7 +195,7 @@ pub struct TokenInfo {
 }
 
 pub enum Token {
-    WETH,
+    ETH,
     BTC,
     WBTC,
     LINK,
@@ -214,7 +214,7 @@ pub enum Token {
 impl Token {
     pub fn info(&self) -> TokenInfo {
         match self {
-            Token::WETH => TokenInfo { name: "WETH", address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", decimals: 18 },
+            Token::ETH => TokenInfo { name: "ETH", address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", decimals: 18 },
             Token::BTC => TokenInfo { name: "BTC", address: "0x47904963fc8b2340414262125aF798B9655E58Cd", decimals: 8 }, // Synthetic
             Token::WBTC => TokenInfo { name: "WBTC", address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", decimals: 8 },
             Token::LINK => TokenInfo { name: "LINK", address: "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4", decimals: 18 },
@@ -233,7 +233,7 @@ impl Token {
 
     pub fn from_name(name: &str) -> Option<Token> {
         match name {
-            "WETH" => Some(Token::WETH),
+            "ETH" => Some(Token::ETH),
             "BTC" => Some(Token::BTC),
             "WBTC" => Some(Token::WBTC),
             "LINK" => Some(Token::LINK),
@@ -268,6 +268,7 @@ pub struct OrderCalcInput {
     pub leverage_factor: f32,
 }
 
+#[derive(Debug)]
 pub struct OrderCalcOutput {
     pub collateral_amount: U256,
     pub size_delta_usd: U256,
@@ -281,39 +282,63 @@ pub struct OrderCalcOutput {
 #[derive(Deserialize, Debug)]
 pub struct PriceData {
     pub id: String,
+    #[serde(rename = "minBlockNumber")]
     pub min_block_number: Option<u64>,
+    #[serde(rename = "minBlockHash")]
     pub min_block_hash: Option<String>,
+    #[serde(rename = "oracleDecimals")]
     pub oracle_decimals: Option<u8>,
+    #[serde(rename = "tokenSymbol")]
     pub token_symbol: String,
+    #[serde(rename = "tokenAddress")]
     pub token_address: String,
+    #[serde(rename = "minPrice")]
     pub min_price: Option<String>,
+    #[serde(rename = "maxPrice")]
     pub max_price: Option<String>,
     pub signer: Option<String>,
     pub signature: Option<String>,
+    #[serde(rename = "signatureWithoutBlockHash")]
     pub signature_without_block_hash: Option<String>,
+    #[serde(rename = "createdAt")]
     pub created_at: Option<String>,
+    #[serde(rename = "minBlockTimestamp")]
     pub min_block_timestamp: Option<u64>,
+    #[serde(rename = "oracleKeeperKey")]
     pub oracle_keeper_key: Option<String>,
+    #[serde(rename = "maxBlockTimestamp")]
     pub max_block_timestamp: Option<u64>,
+    #[serde(rename = "maxBlockNumber")]
     pub max_block_number: Option<u64>,
+    #[serde(rename = "maxBlockHash")]
     pub max_block_hash: Option<String>,
+    #[serde(rename = "maxPriceFull")]
     pub max_price_full: Option<String>,
+    #[serde(rename = "minPriceFull")]
     pub min_price_full: Option<String>,
+    #[serde(rename = "oracleKeeperRecordId")]
     pub oracle_keeper_record_id: Option<String>,
+    #[serde(rename = "oracleKeeperFetchType")]
     pub oracle_keeper_fetch_type: Option<String>,
+    #[serde(rename = "oracleType")]
     pub oracle_type: Option<String>,
     pub blob: Option<String>,
 }
 
+#[derive(Deserialize)]
+pub struct ApiResponse {
+    #[serde(rename = "signedPrices")]
+    pub signed_prices: Vec<PriceData>,
+}
+
+#[derive(Deserialize)]
 pub struct TokenPriceFromApiResponse {
     pub token_symbol: String,
     pub min_price_full: String,
     pub max_price_full: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct GasPriceResponse {
-    pub jsonrpc: String,
-    pub id: i32,
     pub result: String,
 }
