@@ -2,14 +2,17 @@ use crate::contract_caller::utils::structs::{OrderCalcInput, OrderCalcOutput, To
 use ethers::types::U256;
 use reqwest;
 use crate::contract_caller::order_builder::get_price::fetch_token_price;
+use crate::contract_caller::utils::gas_calculator::calculate_execution_fee;
 
 pub async fn calculate_order_params(input: OrderCalcInput) -> Result<OrderCalcOutput, Box<dyn std::error::Error>> {
 
     let mut price_output: TokenPriceFromApiResponse;
-    let mut initial_collateral_delta_amount: U256 = U256::from(0);
-    let mut trigger_price: U256 = U256::from(0);
+    let initial_collateral_delta_amount: U256 = U256::from(0);
+    let trigger_price: U256 = U256::from(0);
     let mut execution_fee: U256 = U256::from(0);
     let mut min_output_amount: U256 = U256::from(0);
+
+    let estimated_gas: u64 = 2000000;
 
 
 
@@ -48,6 +51,9 @@ pub async fn calculate_order_params(input: OrderCalcInput) -> Result<OrderCalcOu
     let size_usd_raw: U256 = collateral_amount * leverage_as_u256;
     let size_delta_usd: U256 = size_usd_raw.checked_mul(U256::exp10(30))
         .ok_or("Decimal adjustment error for size in USD")?;
+
+    // Execution fee calcs
+    execution_fee = calculate_execution_fee(estimated_gas).await?;
 
 
     // Create and return the OrderObject with calculated values
