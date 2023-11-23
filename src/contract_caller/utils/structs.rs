@@ -261,6 +261,7 @@ pub struct SimpleOrder {
 }
 
 pub struct OrderCalcInput {
+    pub order_type: u8,
     pub collateral_token: String,
     pub index_token: String,
     pub collateral_amount: String, 
@@ -308,4 +309,11 @@ pub struct TokenPriceFromApiResponse {
     pub token_symbol: String,
     pub min_price_full: String,
     pub max_price_full: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct GasPriceResponse {
+    pub jsonrpc: String,
+    pub id: i32,
+    pub result: String,
 }
