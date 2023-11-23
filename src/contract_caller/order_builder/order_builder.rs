@@ -12,7 +12,7 @@ pub async fn calculate_order_params(input: OrderCalcInput) -> Result<OrderCalcOu
     let mut execution_fee: U256 = U256::from(0);
     let mut min_output_amount: U256 = U256::from(0);
 
-    let estimated_gas: u64 = 2000000;
+    let estimated_gas: u64 = 2500000;
 
 
 
