@@ -19,10 +19,22 @@ pub async fn calculate_market_increase_order_params(input: OrderCalcInput) -> Re
         .ok_or("Unsupported token")?
         .info();
 
+    // Fetch the current price of the collateral token in USD
+    let collateral_price_output = fetch_token_price(input.collateral_token.clone()).await?;
+    let collateral_price: U256 = U256::from_dec_str(&collateral_price_output.min_price_full)?;
+
     println!("Converting and adjusting collateral amount...");
     let collateral_amount_raw: U256 = U256::from_dec_str(&input.collateral_amount)?;
-    let actual_usd_value: U256 = collateral_amount_raw.checked_div(U256::exp10(collateral_info.decimals as usize))
-        .ok_or("Decimal adjustment error for actual USD value")?;
+    
+    // Calculate the actual USD value of the collateral
+    let actual_usd_value: U256 = if input.collateral_token == "USDC" {
+        collateral_amount_raw // For USDC, the amount is already in USD
+    } else {
+        collateral_amount_raw
+            .checked_mul(collateral_price)
+            .and_then(|amount| amount.checked_div(U256::exp10(collateral_info.decimals as usize)))
+            .ok_or("Conversion to USD value error")?
+    };
 
     println!("Fetching and adjusting prices...");
     let price_output = fetch_token_price(input.index_token.clone()).await?;
