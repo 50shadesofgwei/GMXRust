@@ -1,4 +1,6 @@
-use crate::contract_caller::utils::structs::{MarketIncreaseOrderCalcInput, MarketIncreaseOrderCalcOutput, Token, TokenInfo, AddressesForMarketIncreaseOrder};
+use crate::contract_caller::utils::local_signer::get_local_signer;
+use crate::contract_caller::utils::structs::{MarketIncreaseOrderCalcInput, MarketIncreaseOrderCalcOutput, Token, TokenInfo, AddressesForMarketIncreaseOrder, OrderObject, Markets, SimpleOrder};
+use ethers::signers::Signer;
 use ethers::types::U256;
 use crate::contract_caller::order_builder::get_price::fetch_token_price;
 use crate::contract_caller::utils::gas_calculator::calculate_execution_fee;
@@ -64,17 +66,27 @@ pub async fn calculate_market_increase_order_params(input: MarketIncreaseOrderCa
     })
 }
 
-pub fn get_addresses_for_market_increase_order() -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
-    // TODO: Add address logic
+pub fn get_addresses_for_market_increase_order(input: SimpleOrder) -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
+    let wallet = get_local_signer()?;
+    let receiver: ethers::types::H160 = wallet.address();
+    let default_order: OrderObject = OrderObject::default();
+    let mut market: String = String::new();
+
+    if let Some(market_address) = Markets::get_market_address(&input.index_token) {
+        println!("Market address for {}: {}", input.index_token, market_address);
+        market = market_address;
+    } else {
+        println!("Market address not found for {}", input.index_token);
+    }
 
     // Example placeholder return
     Ok(AddressesForMarketIncreaseOrder {
-        receiver: "0xReceiverAddress".to_string(),
-        callback_contract: "0xCallbackContractAddress".to_string(),
-        ui_fee_receiver: "0xUiFeeReceiverAddress".to_string(),
-        market: "0xMarketAddress".to_string(),
-        initial_collateral_token: "0xInitialCollateralTokenAddress".to_string(),
+        receiver: receiver.to_string(),
+        callback_contract: default_order.callback_contract,
+        ui_fee_receiver: default_order.ui_fee_receiver,
+        market,
+        initial_collateral_token: input.collateral_token.to_string(),
         swap_path: vec!["0xSwapPathAddress1".to_string(), "0xSwapPathAddress2".to_string()],
-        referral_code: vec![],
+        referral_code: default_order.referral_code.to_vec(),
     })
 }

@@ -118,6 +118,29 @@ impl Markets {
             },
         }
     }
+
+    pub fn from_token_name(token_name: &str) -> Option<Self> {
+        match token_name {
+            "ETH" => Some(Markets::ETH),
+            "WBTC" => Some(Markets::WBTC),
+            "DOGE" => Some(Markets::DOGE),
+            "SOL" => Some(Markets::SOL),
+            "LTC" => Some(Markets::LTC),
+            "UNI" => Some(Markets::UNI),
+            "LINK" => Some(Markets::LINK),
+            "ARB" => Some(Markets::ARB),
+            "USDCE" => Some(Markets::USDCE),
+            "USDT" => Some(Markets::USDT),
+            "DAI" => Some(Markets::DAI),
+            "XRP" => Some(Markets::XRP),
+            _ => None,
+        }
+    }
+
+    pub fn get_market_address(token_name: &str) -> Option<String> {
+        Markets::from_token_name(token_name)
+            .map(|market| market.info().market_address)
+    }
 }
 
 
