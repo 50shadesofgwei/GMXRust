@@ -5,8 +5,8 @@ use ethers::types::U256;
 use crate::contract_caller::order_builder::get_price::fetch_token_price;
 use crate::contract_caller::utils::gas_calculator::calculate_execution_fee;
 
-pub async fn calculate_market_increase_order_params(input: SimpleOrder) -> Result<MarketIncreaseOrderCalcOutput, Box<dyn std::error::Error>> {
-    const USD_SCALE_FACTOR: u32 = 30; // GMX's scaling factor for USD values
+pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Result<MarketIncreaseOrderCalcOutput, Box<dyn std::error::Error>> {
+    const USD_SCALE_FACTOR: u32 = 30; // Scaling factor for USD values
 
     println!("Starting order parameter calculations...");
 
@@ -15,6 +15,7 @@ pub async fn calculate_market_increase_order_params(input: SimpleOrder) -> Resul
     let min_output_amount: U256 = U256::from(0);
 
     let estimated_gas: u64 = 2500000;
+    let is_long: bool = input.is_long;
 
     println!("Fetching token information...");
     let collateral_info: TokenInfo = Token::from_name(&input.collateral_token)
@@ -28,15 +29,10 @@ pub async fn calculate_market_increase_order_params(input: SimpleOrder) -> Resul
     println!("Converting and adjusting collateral amount...");
     let collateral_amount_raw: U256 = U256::from_dec_str(&input.collateral_amount)?;
     
-    // Calculate the actual USD value of the collateral
-    let actual_usd_value: U256 = if input.collateral_token == "USDC" {
-        collateral_amount_raw // For USDC, the amount is already in USD
-    } else {
-        collateral_amount_raw
-            .checked_mul(collateral_price)
-            .and_then(|amount| amount.checked_div(U256::exp10(collateral_info.decimals as usize)))
-            .ok_or("Conversion to USD value error")?
-    };
+    // Calculate the USD value of the collateral
+    let actual_usd_value: U256 = collateral_amount_raw
+    .checked_div(U256::exp10(collateral_info.decimals as usize))
+    .ok_or("Conversion to USD value error")?;
 
     println!("Fetching and adjusting prices...");
     let price_output = fetch_token_price(input.index_token.clone()).await?;
@@ -56,6 +52,7 @@ pub async fn calculate_market_increase_order_params(input: SimpleOrder) -> Resul
 
     println!("Returning calculated order parameters...");
     Ok(MarketIncreaseOrderCalcOutput {
+        is_long,
         collateral_amount: collateral_amount_raw, 
         size_delta_usd,
         initial_collateral_delta_amount,
@@ -66,7 +63,7 @@ pub async fn calculate_market_increase_order_params(input: SimpleOrder) -> Resul
     })
 }
 
-pub fn get_addresses_for_market_increase_order(input: SimpleOrder) -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
+pub fn get_addresses_for_market_increase_order(input: &SimpleOrder) -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
     let wallet = get_local_signer()?;
     let receiver: ethers::types::H160 = wallet.address();
     let default_order: OrderObject = OrderObject::default();
@@ -93,7 +90,6 @@ pub fn get_addresses_for_market_increase_order(input: SimpleOrder) -> Result<Add
 }
 
 pub fn create_full_order_object(
-    simple_order: SimpleOrder,
     address_data: AddressesForMarketIncreaseOrder,
     calc_output: MarketIncreaseOrderCalcOutput,
 ) -> Result<OrderObject, Box<dyn std::error::Error>> {
@@ -102,7 +98,7 @@ pub fn create_full_order_object(
         .map_err(|_| "Referral code must be 32 bytes")?;
 
     Ok(OrderObject {
-        is_long: simple_order.is_long,
+        is_long: calc_output.is_long,
         position_asset: address_data.initial_collateral_token.clone(),
         amount: calc_output.collateral_amount.to_string(),
         receiver: address_data.receiver,
@@ -123,4 +119,12 @@ pub fn create_full_order_object(
         should_unwrap_native_token: false,
         referral_code,
     })
+}
+
+pub async fn get_order_object_from_simple_order(input: &SimpleOrder) -> Result<OrderObject, Box<dyn std::error::Error>> {
+    let number_params: MarketIncreaseOrderCalcOutput = calculate_market_increase_order_params(input).await?;
+    let address_params: AddressesForMarketIncreaseOrder = get_addresses_for_market_increase_order(input)?;
+    let full_object: OrderObject = create_full_order_object(address_params, number_params)?;
+
+    Ok(full_object)
 }

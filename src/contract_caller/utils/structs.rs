@@ -155,7 +155,7 @@ impl Markets {
     }
 }
 
-
+#[derive(Debug)]
 pub struct OrderObject {
     pub is_long: bool,
     pub position_asset: String,
@@ -297,6 +297,7 @@ pub struct SimpleOrder {
 
 #[derive(Debug)]
 pub struct MarketIncreaseOrderCalcOutput {
+    pub is_long: bool,
     pub collateral_amount: U256,
     pub size_delta_usd: U256,
     pub initial_collateral_delta_amount: U256,

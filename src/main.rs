@@ -1,7 +1,7 @@
 pub mod contract_caller;
 
-use crate::contract_caller::utils::structs::{SimpleOrder, MarketIncreaseOrderCalcOutput};
-use crate::contract_caller::order_builder::get_params_for_order_type::market_increase_order_params::calculate_market_increase_order_params;
+use crate::contract_caller::utils::structs::{SimpleOrder, OrderObject};
+use crate::contract_caller::order_builder::get_params_for_order_type::market_increase_order_params::get_order_object_from_simple_order;
 use dotenv::dotenv;
 
 #[tokio::main]
@@ -16,9 +16,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         leverage_factor: 10.0,
     };
 
-    let test_result: MarketIncreaseOrderCalcOutput = calculate_market_increase_order_params(test).await?;
+    let test_result: OrderObject = get_order_object_from_simple_order(&test).await?;
 
-    // Use test_result for something, or print it out
     println!("{:?}", test_result);
 
     Ok(())
