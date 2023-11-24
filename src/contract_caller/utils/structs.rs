@@ -290,15 +290,8 @@ impl Token {
 pub struct SimpleOrder {
     pub is_long: bool,
     pub index_token: String,
-    pub amount: String,
+    pub collateral_amount: String,
     pub collateral_token: String,
-    pub leverage_factor: f32,
-}
-
-pub struct MarketIncreaseOrderCalcInput {
-    pub collateral_token: String,
-    pub index_token: String,
-    pub collateral_amount: String, 
     pub leverage_factor: f32,
 }
 
@@ -315,13 +308,13 @@ pub struct MarketIncreaseOrderCalcOutput {
 
 #[derive(Debug, Clone)]
 pub struct AddressesForMarketIncreaseOrder {
-    pub receiver: String, // Address to receive the output of the transaction
-    pub callback_contract: String, // Address of the contract to callback, if needed
-    pub ui_fee_receiver: String, // Address to receive UI fees, if applicable
-    pub market: String, // Address of the market where the order will be placed
-    pub initial_collateral_token: String, // Address of the token used as initial collateral
-    pub swap_path: Vec<String>, // Addresses involved in the swap path, if any
-    pub referral_code: Vec<u8>, // Referral code, if applicable
+    pub receiver: String,
+    pub callback_contract: String,
+    pub ui_fee_receiver: String,
+    pub market: String, 
+    pub initial_collateral_token: String, 
+    pub swap_path: Vec<String>, 
+    pub referral_code: Vec<u8>, 
 }
 
 #[derive(Deserialize, Debug)]

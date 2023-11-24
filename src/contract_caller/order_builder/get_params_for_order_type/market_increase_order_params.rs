@@ -1,11 +1,11 @@
 use crate::contract_caller::utils::local_signer::get_local_signer;
-use crate::contract_caller::utils::structs::{MarketIncreaseOrderCalcInput, MarketIncreaseOrderCalcOutput, Token, TokenInfo, AddressesForMarketIncreaseOrder, OrderObject, Markets, SimpleOrder};
+use crate::contract_caller::utils::structs::{MarketIncreaseOrderCalcOutput, Token, TokenInfo, AddressesForMarketIncreaseOrder, OrderObject, Markets, SimpleOrder};
 use ethers::signers::Signer;
 use ethers::types::U256;
 use crate::contract_caller::order_builder::get_price::fetch_token_price;
 use crate::contract_caller::utils::gas_calculator::calculate_execution_fee;
 
-pub async fn calculate_market_increase_order_params(input: MarketIncreaseOrderCalcInput) -> Result<MarketIncreaseOrderCalcOutput, Box<dyn std::error::Error>> {
+pub async fn calculate_market_increase_order_params(input: SimpleOrder) -> Result<MarketIncreaseOrderCalcOutput, Box<dyn std::error::Error>> {
     const USD_SCALE_FACTOR: u32 = 30; // GMX's scaling factor for USD values
 
     println!("Starting order parameter calculations...");
@@ -89,5 +89,38 @@ pub fn get_addresses_for_market_increase_order(input: SimpleOrder) -> Result<Add
         initial_collateral_token: input.collateral_token.to_string(),
         swap_path,
         referral_code: default_order.referral_code.to_vec(),
+    })
+}
+
+pub fn create_full_order_object(
+    simple_order: SimpleOrder,
+    address_data: AddressesForMarketIncreaseOrder,
+    calc_output: MarketIncreaseOrderCalcOutput,
+) -> Result<OrderObject, Box<dyn std::error::Error>> {
+    let referral_code: [u8; 32] = address_data.referral_code
+        .try_into()
+        .map_err(|_| "Referral code must be 32 bytes")?;
+
+    Ok(OrderObject {
+        is_long: simple_order.is_long,
+        position_asset: address_data.initial_collateral_token.clone(),
+        amount: calc_output.collateral_amount.to_string(),
+        receiver: address_data.receiver,
+        callback_contract: address_data.callback_contract,
+        ui_fee_receiver: address_data.ui_fee_receiver,
+        market: address_data.market,
+        initial_collateral_token: address_data.initial_collateral_token,
+        swap_path: address_data.swap_path,
+        size_delta_usd: calc_output.size_delta_usd.to_string(),
+        initial_collateral_delta_amount: calc_output.initial_collateral_delta_amount.to_string(),
+        trigger_price: calc_output.trigger_price.to_string(),
+        acceptable_price: calc_output.acceptable_price.to_string(),
+        execution_fee: calc_output.execution_fee.to_string(),
+        callback_gas_limit: "0".to_string(), 
+        min_output_amount: calc_output.min_output_amount.to_string(),
+        order_type: 2,
+        decrease_position_swap_type: 0, 
+        should_unwrap_native_token: false,
+        referral_code,
     })
 }
