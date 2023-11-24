@@ -1,9 +1,9 @@
-use crate::contract_caller::utils::structs::{OrderCalcInput, OrderCalcOutput, Token, TokenInfo};
+use crate::contract_caller::utils::structs::{MarketIncreaseOrderCalcInput, MarketIncreaseOrderCalcOutput, Token, TokenInfo, AddressesForMarketIncreaseOrder};
 use ethers::types::U256;
 use crate::contract_caller::order_builder::get_price::fetch_token_price;
 use crate::contract_caller::utils::gas_calculator::calculate_execution_fee;
 
-pub async fn calculate_market_increase_order_params(input: OrderCalcInput) -> Result<OrderCalcOutput, Box<dyn std::error::Error>> {
+pub async fn calculate_market_increase_order_params(input: MarketIncreaseOrderCalcInput) -> Result<MarketIncreaseOrderCalcOutput, Box<dyn std::error::Error>> {
     const USD_SCALE_FACTOR: u32 = 30; // GMX's scaling factor for USD values
 
     println!("Starting order parameter calculations...");
@@ -53,7 +53,7 @@ pub async fn calculate_market_increase_order_params(input: OrderCalcInput) -> Re
     let execution_fee = calculate_execution_fee(estimated_gas).await?;
 
     println!("Returning calculated order parameters...");
-    Ok(OrderCalcOutput {
+    Ok(MarketIncreaseOrderCalcOutput {
         collateral_amount: collateral_amount_raw, 
         size_delta_usd,
         initial_collateral_delta_amount,
@@ -61,5 +61,20 @@ pub async fn calculate_market_increase_order_params(input: OrderCalcInput) -> Re
         acceptable_price,
         execution_fee,
         min_output_amount
+    })
+}
+
+pub fn get_addresses_for_market_increase_order() -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
+    // TODO: Add address logic
+
+    // Example placeholder return
+    Ok(AddressesForMarketIncreaseOrder {
+        receiver: "0xReceiverAddress".to_string(),
+        callback_contract: "0xCallbackContractAddress".to_string(),
+        ui_fee_receiver: "0xUiFeeReceiverAddress".to_string(),
+        market: "0xMarketAddress".to_string(),
+        initial_collateral_token: "0xInitialCollateralTokenAddress".to_string(),
+        swap_path: vec!["0xSwapPathAddress1".to_string(), "0xSwapPathAddress2".to_string()],
+        referral_code: vec![],
     })
 }

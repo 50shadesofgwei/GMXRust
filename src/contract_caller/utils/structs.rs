@@ -260,8 +260,7 @@ pub struct SimpleOrder {
     pub leverage_factor: f32,
 }
 
-pub struct OrderCalcInput {
-    pub order_type: u8,
+pub struct MarketIncreaseOrderCalcInput {
     pub collateral_token: String,
     pub index_token: String,
     pub collateral_amount: String, 
@@ -269,7 +268,7 @@ pub struct OrderCalcInput {
 }
 
 #[derive(Debug)]
-pub struct OrderCalcOutput {
+pub struct MarketIncreaseOrderCalcOutput {
     pub collateral_amount: U256,
     pub size_delta_usd: U256,
     pub initial_collateral_delta_amount: U256,
@@ -277,6 +276,17 @@ pub struct OrderCalcOutput {
     pub acceptable_price: U256,
     pub execution_fee: U256,
     pub min_output_amount: U256,
+}
+
+#[derive(Debug, Clone)]
+pub struct AddressesForMarketIncreaseOrder {
+    pub receiver: String, // Address to receive the output of the transaction
+    pub callback_contract: String, // Address of the contract to callback, if needed
+    pub ui_fee_receiver: String, // Address to receive UI fees, if applicable
+    pub market: String, // Address of the market where the order will be placed
+    pub initial_collateral_token: String, // Address of the token used as initial collateral
+    pub swap_path: Vec<String>, // Addresses involved in the swap path, if any
+    pub referral_code: Vec<u8>, // Referral code, if applicable
 }
 
 #[derive(Deserialize, Debug)]
