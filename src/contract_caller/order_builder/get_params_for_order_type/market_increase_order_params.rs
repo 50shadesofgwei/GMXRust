@@ -71,6 +71,7 @@ pub fn get_addresses_for_market_increase_order(input: SimpleOrder) -> Result<Add
     let receiver: ethers::types::H160 = wallet.address();
     let default_order: OrderObject = OrderObject::default();
     let mut market: String = String::new();
+    let swap_path: Vec<String> = Markets::get_swap_path_for_collateral(&input.collateral_token);
 
     if let Some(market_address) = Markets::get_market_address(&input.index_token) {
         println!("Market address for {}: {}", input.index_token, market_address);
@@ -79,14 +80,14 @@ pub fn get_addresses_for_market_increase_order(input: SimpleOrder) -> Result<Add
         println!("Market address not found for {}", input.index_token);
     }
 
-    // Example placeholder return
+
     Ok(AddressesForMarketIncreaseOrder {
         receiver: receiver.to_string(),
         callback_contract: default_order.callback_contract,
         ui_fee_receiver: default_order.ui_fee_receiver,
         market,
         initial_collateral_token: input.collateral_token.to_string(),
-        swap_path: vec!["0xSwapPathAddress1".to_string(), "0xSwapPathAddress2".to_string()],
+        swap_path,
         referral_code: default_order.referral_code.to_vec(),
     })
 }

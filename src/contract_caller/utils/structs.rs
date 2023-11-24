@@ -141,6 +141,18 @@ impl Markets {
         Markets::from_token_name(token_name)
             .map(|market| market.info().market_address)
     }
+
+    pub fn get_swap_path_for_collateral(collateral_token: &str) -> Vec<String> {
+        if collateral_token != "USDC" {
+            if let Some(market_address) = Markets::get_market_address(collateral_token) {
+                vec![market_address]
+            } else {
+                Vec::new()
+            }
+        } else {
+            Vec::new()
+        }
+    }
 }
 
 

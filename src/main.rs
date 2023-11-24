@@ -9,8 +9,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     let test: MarketIncreaseOrderCalcInput = MarketIncreaseOrderCalcInput {
-        collateral_token: "LINK".to_string(),
-        collateral_amount: "10000000000000000000".to_string(),
+        collateral_token: "USDC".to_string(),
+        collateral_amount: "1000000000".to_string(),
         index_token: "ETH".to_string(),
         leverage_factor: 10.0,
     };

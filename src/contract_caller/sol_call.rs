@@ -32,7 +32,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let usdc_native_address: H160 = usdc_native_address_str.parse()?;
 
     // Vault
-    let vault_address_str: String = "0x82aFd2590814a7Ce3d7ea6b63F80481F8b227bA9".to_string();
+    let vault_address_str: String = "0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".to_string();
     let vault_address: H160 = vault_address_str.parse()?;
 
     // // WETH (WNT)
