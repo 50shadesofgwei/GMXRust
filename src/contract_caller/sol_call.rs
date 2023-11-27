@@ -14,6 +14,14 @@ abigen!{
     USDC_NATIVE, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/usdc_arb_native_abi.json";
     VAULT, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/vault_abi.json";
     WETH, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/weth_abi.json";
+    DAI, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/dai_abi.json";
+    ARB, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/arb_abi.json";
+    LINK, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/link_abi.json";
+    UNI, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/uni_abi.json";
+    USDCE, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/usdce_abi.json";
+    USDT, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/usdt_abi.json";
+    WBTC, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/wbtc_abi.json";
+    SOL, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/wsol_abi.json";
 }
 
 pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::error::Error>> {
