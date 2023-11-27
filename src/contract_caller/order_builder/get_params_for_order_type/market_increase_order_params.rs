@@ -10,6 +10,10 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
 
     println!("Starting order parameter calculations...");
 
+    if input.leverage_factor > 50.0 {
+        return Err("Leverage factor cannot exceed 50".into());
+    }
+
     let initial_collateral_delta_amount: U256 = U256::from(0);
     let trigger_price: U256 = U256::from(0);
     let min_output_amount: U256 = U256::from(0);
@@ -66,6 +70,9 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
 pub fn get_addresses_for_market_increase_order(input: &SimpleOrder) -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
     let wallet = get_local_signer()?;
     let receiver: ethers::types::H160 = wallet.address();
+    let receiver_str = format!("{:?}", receiver);
+
+    println!("Full Address: {}", receiver_str);
     let default_order: OrderObject = OrderObject::default();
     let mut market: String = String::new();
     let swap_path: Vec<String> = Markets::get_swap_path_for_collateral(&input.collateral_token);
@@ -85,7 +92,7 @@ pub fn get_addresses_for_market_increase_order(input: &SimpleOrder) -> Result<Ad
         market,
         initial_collateral_token: input.collateral_token.to_string(),
         swap_path,
-        referral_code: default_order.referral_code.to_vec(),
+        referral_code: default_order.referral_code,
     })
 }
 
@@ -93,9 +100,7 @@ pub fn create_full_order_object(
     address_data: AddressesForMarketIncreaseOrder,
     calc_output: MarketIncreaseOrderCalcOutput,
 ) -> Result<OrderObject, Box<dyn std::error::Error>> {
-    let referral_code: [u8; 32] = address_data.referral_code
-        .try_into()
-        .map_err(|_| "Referral code must be 32 bytes")?;
+    let referral_code: String = address_data.referral_code;
 
     Ok(OrderObject {
         is_long: calc_output.is_long,

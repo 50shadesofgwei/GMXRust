@@ -7,7 +7,6 @@ pub async fn fetch_token_price(index_token: String) -> Result<TokenPriceFromApiR
     // Get the raw response
     let response = reqwest::get(url).await?;
     let response_text = response.text().await?;
-    println!("Response from API: {}", response_text);
 
     // Deserialize the response text to ApiResponse
     let response_json: ApiResponse = serde_json::from_str(&response_text)?;

@@ -2,6 +2,7 @@ use ethers::prelude::*;
 use ethers::types::{H160, Address, U256};
 use dotenv::dotenv;
 use std::env;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use super::utils::local_signer::get_local_signer;
@@ -35,9 +36,9 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let vault_address_str: String = "0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".to_string();
     let vault_address: H160 = vault_address_str.parse()?;
 
-    // // WETH (WNT)
-    // let weth_address_str: String = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".to_string();
-    // let weth_address: H160 = weth_address_str.parse()?;
+    // WETH (WNT)
+    let weth_address_str: String = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".to_string();
+    let weth_address: H160 = weth_address_str.parse()?;
 
 
     // Initialise providers
@@ -69,6 +70,10 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let initial_collateral_token: Address = order_object.initial_collateral_token.parse()?;
     let swap_path: Vec<Address> = order_object.swap_path.iter().map(|s| s.parse()).collect::<Result<_, _>>()?;
 
+    let referral_code_str: String = order_object.referral_code;
+    let referral_code_h256: TxHash = H256::from_str(&referral_code_str)?;
+    let referral_code_bytes: [u8; 32] = referral_code_h256.into();
+
     // Create the order object to be submitted to the chain
     let create_order_object: CreateOrderParams = CreateOrderParams {
         addresses: CreateOrderParamsAddresses {
@@ -92,7 +97,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
         decrease_position_swap_type: order_object.decrease_position_swap_type,
         is_long: order_object.is_long,
         should_unwrap_native_token: order_object.should_unwrap_native_token,
-        referral_code: order_object.referral_code,
+        referral_code: referral_code_bytes,
     };
 
 
@@ -107,20 +112,23 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ---------------------------------------------------------
 
     // ----------------------------------
-    //            Tx1: Approve
+    //            Tx1: Send Gas
     // ----------------------------------
 
-    // let tx1_builder = usdc_native_contract.approve(exchange_router_address, usdc_amount);
-    // let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
+    let weth_amount: U256 = execution_fee;
+
+    // Encode the sendWnt transaction calldata
+    let tx1_builder = exchange_router_contract.send_wnt(vault_address, weth_amount);
+    let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
     
     // ----------------------------------
     //         Tx2: Vault Deposit
     // ----------------------------------
 
-    // let token_reciever_address_str: String = "0x31ef83a530fde1b38ee9a18093a333d8bbbc40d5".to_string();
-    // let token_reciever_address: H160 = token_reciever_address_str.parse()?;
-    // let tx2_builder = exchange_router_contract.send_tokens(usdc_native_address, token_reciever_address, usdc_amount);
-    // let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
+    let token_address_str: String = order_object.initial_collateral_token;
+    let token_address_h160: H160 = token_address_str.parse()?;
+    let tx2_builder = exchange_router_contract.send_tokens(token_address_h160, vault_address, amount_u256);
+    let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
 
     // ----------------------------------
     //         Tx3: Create Order
@@ -134,11 +142,11 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //      Bundling & Tx Execution 
     // ----------------------------------
 
-    // let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
-    // let multicall_tx_call = exchange_router_contract.multicall(bundle);
+    let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
+    let multicall_tx_call = exchange_router_contract.multicall(bundle);
 
-    // // Sign and send the transaction directly using the wallet
-    // let receipt = multicall_tx_call.send().await?;
+    // Sign and send the transaction directly using the wallet
+    let receipt = multicall_tx_call.send().await?;
 
     Ok(())
 }

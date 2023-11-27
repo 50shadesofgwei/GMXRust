@@ -176,7 +176,7 @@ pub struct OrderObject {
     pub order_type: u8,
     pub decrease_position_swap_type: u8,
     pub should_unwrap_native_token: bool,
-    pub referral_code: [u8; 32],
+    pub referral_code: String,
 }
 
 pub enum OrderType {
@@ -218,7 +218,7 @@ impl Default for OrderObject {
             order_type: 0,
             decrease_position_swap_type: 0,
             should_unwrap_native_token: false,
-            referral_code: [0; 32],
+            referral_code: "0x0000000000000000000000000000000000000000000000000000000000000000".to_string(),
         }
     }
 }
@@ -315,7 +315,7 @@ pub struct AddressesForMarketIncreaseOrder {
     pub market: String, 
     pub initial_collateral_token: String, 
     pub swap_path: Vec<String>, 
-    pub referral_code: Vec<u8>, 
+    pub referral_code: String, 
 }
 
 #[derive(Deserialize, Debug)]
