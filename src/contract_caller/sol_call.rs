@@ -7,6 +7,9 @@ use std::sync::Arc;
 
 use super::utils::local_signer::get_local_signer;
 use super::utils::structs::OrderObject;
+use super::utils::contract_addresses::Contracts;
+
+use crate::contract_caller::connect_provider::connect_provider;
 
 // Create contract instances from abis w/ abigen
 abigen!{ 
@@ -31,34 +34,11 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //                      Initialisation
     // ---------------------------------------------------------
 
-    // Some necessary preamble for contract instances
-    // Exchange Router
-    let exchange_router_address_str: String = "0xFE98518C9c8F1c5a216E999816c2dE3199f295D2".to_string();
-    let exchange_router_address: Address = exchange_router_address_str.parse()?;
-
-    // USDC (Native)
-    let usdc_native_address_str: String = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831".to_string();
-    let usdc_native_address: H160 = usdc_native_address_str.parse()?;
-
-    // Vault
-    let vault_address_str: String = "0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".to_string();
-    let vault_address: H160 = vault_address_str.parse()?;
-
-    // WETH (WNT)
-    let weth_address_str: String = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".to_string();
-    let weth_address: H160 = weth_address_str.parse()?;
+    let provider: Provider<Http> = connect_provider().await?;
+    let arc_provider: Arc<Provider<Http>> = Arc::new(provider);
+    let contracts: Contracts = Contracts::new(arc_provider);
 
 
-    // Initialise providers
-    let rpc_url: String = env::var("PROVIDER_URL")?;
-    let provider: Provider<Http> = Provider::<Http>::try_from(rpc_url.as_str())?;
-    let provider: Arc<Provider<Http>> = Arc::new(provider);  // Wrap the provider in an Arc
-
-
-    // Create contract instances
-    let exchange_router_contract: EXCHANGE_ROUTER<_> = EXCHANGE_ROUTER::new(exchange_router_address, provider.clone());
-    let usdc_native_contract: USDC_NATIVE<Provider<Http>> = USDC_NATIVE::new(usdc_native_address, provider.clone());
-    // let vault_contract: VAULT<_> = VAULT::new(vault_address, provider.clone());
 
     // Parse number values to U256
     let amount_u256: U256 = order_object.amount.parse()?;
@@ -110,7 +90,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
 
     // Build local wallet
-    let wallet = get_local_signer();
+    let wallet = get_local_signer()?;
 
 
     // ---------------------------------------------------------
@@ -120,13 +100,33 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ---------------------------------------------------------
 
     // ----------------------------------
+    //            Tx0: Approvals
+    // ----------------------------------
+
+    let exchange_router_address: H160 = contracts.exchange_router_contract.address();
+    let tx0_builder = match order_object.collateral_token.as_str() {
+        "USDC" => contracts.usdc_contract.approve(exchange_router_address, amount_u256),
+        "DAI" => contracts.dai_contract.approve(exchange_router_address, amount_u256),
+        "WETH" => contracts.weth_contract.approve(exchange_router_address, amount_u256),
+        "WBTC" => contracts.wbtc_contract.approve(exchange_router_address, amount_u256),
+        "LINK" => contracts.link_contract.approve(exchange_router_address, amount_u256),
+        "ARB" => contracts.arb_contract.approve(exchange_router_address, amount_u256),
+        "UNI" => contracts.uni_contract.approve(exchange_router_address, amount_u256),
+        "SOL" => contracts.sol_contract.approve(exchange_router_address, amount_u256),
+        "USDT" => contracts.usdt_contract.approve(exchange_router_address, amount_u256),
+        "USDCE" => contracts.usdce_contract.approve(exchange_router_address, amount_u256),
+        _ => return Err("Unsupported collateral token".into()),
+    };
+    let tx0_bytes: Bytes = tx0_builder.calldata().unwrap();
+
+    // ----------------------------------
     //            Tx1: Send Gas
     // ----------------------------------
 
     let weth_amount: U256 = execution_fee;
 
     // Encode the sendWnt transaction calldata
-    let tx1_builder = exchange_router_contract.send_wnt(vault_address, weth_amount);
+    let tx1_builder = contracts.exchange_router_contract.send_wnt(contracts.vault_contract, weth_amount);
     let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
     
     // ----------------------------------
@@ -135,7 +135,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     let token_address_str: String = order_object.initial_collateral_token;
     let token_address_h160: H160 = token_address_str.parse()?;
-    let tx2_builder = exchange_router_contract.send_tokens(token_address_h160, vault_address, amount_u256);
+    let tx2_builder = contracts.exchange_router_contract.send_tokens(token_address_h160, contracts.vault_contract, amount_u256);
     let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
 
     // ----------------------------------

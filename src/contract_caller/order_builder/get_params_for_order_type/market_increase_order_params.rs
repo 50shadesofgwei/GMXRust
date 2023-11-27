@@ -71,6 +71,7 @@ pub fn get_addresses_for_market_increase_order(input: &SimpleOrder) -> Result<Ad
     let wallet = get_local_signer()?;
     let receiver: ethers::types::H160 = wallet.address();
     let receiver_str = format!("{:?}", receiver);
+    let collateral_token: String = input.collateral_token;
 
     println!("Full Address: {}", receiver_str);
     let default_order: OrderObject = OrderObject::default();
@@ -123,6 +124,7 @@ pub fn create_full_order_object(
         decrease_position_swap_type: 0, 
         should_unwrap_native_token: false,
         referral_code,
+        collateral_token: address_data.initial_collateral_token,
     })
 }
 

@@ -17,20 +17,22 @@ abigen!{
 }
 
 pub struct Contracts {
-    usdc_contract: USDC_NATIVE<Provider<Http>>,
-    dai_contract: DAI<Provider<Http>>,
-    weth_contract: WETH<Provider<Http>>,
-    wbtc_contract: WBTC<Provider<Http>>,
-    link_contract: LINK<Provider<Http>>,
-    arb_contract: ARB<Provider<Http>>,
-    uni_contract:UNI<Provider<Http>>,
-    sol_contract: SOL<Provider<Http>>,
-    usdt_contract: USDT<Provider<Http>>,
-    usdce_contract: USDCE<Provider<Http>>,
+    pub usdc_contract: USDC_NATIVE<Provider<Http>>,
+    pub dai_contract: DAI<Provider<Http>>,
+    pub weth_contract: WETH<Provider<Http>>,
+    pub wbtc_contract: WBTC<Provider<Http>>,
+    pub link_contract: LINK<Provider<Http>>,
+    pub arb_contract: ARB<Provider<Http>>,
+    pub uni_contract:UNI<Provider<Http>>,
+    pub sol_contract: SOL<Provider<Http>>,
+    pub usdt_contract: USDT<Provider<Http>>,
+    pub usdce_contract: USDCE<Provider<Http>>,
+    pub exchange_router_contract: EXCHANGE_ROUTER<Provider<Http>>,
+    pub vault_contract: VAULT<Provider<Http>>,
 }
 
 impl Contracts {
-    fn new(provider: Arc<Provider<Http>>) -> Self {
+    pub fn new(provider: Arc<Provider<Http>>) -> Self {
         Contracts {
             usdc_contract: USDC_NATIVE::<Provider<Http>>::new("0xaf88d065e77c8cC2239327C5EDb3A432268e5831".parse::<H160>().unwrap(), provider.clone()),
             dai_contract: DAI::<Provider<Http>>::new("0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1".parse::<H160>().unwrap(), provider.clone()),
@@ -42,11 +44,13 @@ impl Contracts {
             sol_contract: SOL::<Provider<Http>>::new("0x53B56de645B9de6e5a40acE047D1c74E8B42Eccb".parse::<H160>().unwrap(), provider.clone()),
             usdt_contract: USDT::<Provider<Http>>::new("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9".parse::<H160>().unwrap(), provider.clone()),
             usdce_contract: USDCE::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
+            exchange_router_contract: EXCHANGE_ROUTER::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
+            vault_contract: VAULT::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
         }
     }
 
     // Dynamically select and call approve function based on token
-    async fn approve(&self, token: &str, spender: Address, amount: U256) -> Result<Bytes, Box<dyn std::error::Error>> {
+    pub async fn approve(&self, token: &str, spender: Address, amount: U256) -> Result<Bytes, Box<dyn std::error::Error>> {
         match token {
             "USDC" => Ok(self.usdc_contract.approve(spender, amount).calldata().unwrap()),
             "DAI" => Ok(self.dai_contract.approve(spender, amount).calldata().unwrap()),

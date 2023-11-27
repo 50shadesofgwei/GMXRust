@@ -1,7 +1,8 @@
 use ethers::prelude::*;
 use std::env;
+use std::error::Error;
 
-pub async fn connect_provider() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn connect_provider() -> Result<Provider<Http>, Box<dyn Error>> {
     let provider_url: String = match env::var("PROVIDER_URL") {
         Ok(value) => value,
         Err(e) => {
@@ -14,5 +15,5 @@ pub async fn connect_provider() -> Result<(), Box<dyn std::error::Error>> {
     let block_number: U64 = provider.get_block_number().await?;
     println!("Connected to provider at block number: {block_number}");
 
-    Ok(())
+    Ok(provider)
 }
