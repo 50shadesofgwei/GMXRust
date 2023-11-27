@@ -39,7 +39,7 @@ impl Contracts {
             link_contract: LINK::<Provider<Http>>::new("0xf97f4df75117a78c1A5a0DBb814Af92458539FB4".parse::<H160>().unwrap(), provider.clone()),
             arb_contract: ARB::<Provider<Http>>::new("0x912CE59144191C1204E64559FE8253a0e49E6548".parse::<H160>().unwrap(), provider.clone()),
             uni_contract: UNI::<Provider<Http>>::new("0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0".parse::<H160>().unwrap(), provider.clone()),
-            sol_contract: SOL::<Provider<Http>>::new("0x2bcC6D6CdBbDC0a4071e48bb3B969b06B3330c07".parse::<H160>().unwrap(), provider.clone()),
+            sol_contract: SOL::<Provider<Http>>::new("0x53B56de645B9de6e5a40acE047D1c74E8B42Eccb".parse::<H160>().unwrap(), provider.clone()),
             usdt_contract: USDT::<Provider<Http>>::new("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9".parse::<H160>().unwrap(), provider.clone()),
             usdce_contract: USDCE::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
         }
