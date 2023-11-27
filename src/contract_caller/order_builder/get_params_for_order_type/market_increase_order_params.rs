@@ -124,7 +124,6 @@ pub fn create_full_order_object(
         decrease_position_swap_type: 0, 
         should_unwrap_native_token: false,
         referral_code,
-        collateral_token: address_data.initial_collateral_token,
     })
 }
 

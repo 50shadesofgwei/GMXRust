@@ -167,7 +167,6 @@ pub struct OrderObject {
     pub decrease_position_swap_type: u8,
     pub should_unwrap_native_token: bool,
     pub referral_code: String,
-    pub collateral_token: String,
 }
 
 pub enum OrderType {
@@ -210,7 +209,6 @@ impl Default for OrderObject {
             decrease_position_swap_type: 0,
             should_unwrap_native_token: false,
             referral_code: "0x0000000000000000000000000000000000000000000000000000000000000000".to_string(),
-            collateral_token: "".to_string(),
         }
     }
 }

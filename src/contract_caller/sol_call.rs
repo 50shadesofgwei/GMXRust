@@ -104,7 +104,8 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ----------------------------------
 
     let exchange_router_address: H160 = contracts.exchange_router_contract.address();
-    let tx0_builder = match order_object.collateral_token.as_str() {
+    let vault_contract_address: H160 = contracts.vault_contract.address();
+    let tx0_builder = match order_object.initial_collateral_token.as_str() {
         "USDC" => contracts.usdc_contract.approve(exchange_router_address, amount_u256),
         "DAI" => contracts.dai_contract.approve(exchange_router_address, amount_u256),
         "WETH" => contracts.weth_contract.approve(exchange_router_address, amount_u256),
@@ -126,7 +127,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let weth_amount: U256 = execution_fee;
 
     // Encode the sendWnt transaction calldata
-    let tx1_builder = contracts.exchange_router_contract.send_wnt(contracts.vault_contract, weth_amount);
+    let tx1_builder = contracts.exchange_router_contract.send_wnt(vault_contract_address, weth_amount);
     let tx1_bytes: Bytes = tx1_builder.calldata().unwrap();
     
     // ----------------------------------
@@ -135,14 +136,14 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     let token_address_str: String = order_object.initial_collateral_token;
     let token_address_h160: H160 = token_address_str.parse()?;
-    let tx2_builder = contracts.exchange_router_contract.send_tokens(token_address_h160, contracts.vault_contract, amount_u256);
+    let tx2_builder = contracts.exchange_router_contract.send_tokens(token_address_h160, vault_contract_address, amount_u256);
     let tx2_bytes: Bytes = tx2_builder.calldata().unwrap();
 
     // ----------------------------------
     //         Tx3: Create Order
     // ----------------------------------
 
-    let tx3_builder = exchange_router_contract.create_order(create_order_object);
+    let tx3_builder = contracts.exchange_router_contract.create_order(create_order_object);
     let tx3_bytes: Bytes = tx3_builder.calldata().unwrap();
 
 
@@ -151,7 +152,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ----------------------------------
 
     let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
-    let multicall_tx_call = exchange_router_contract.multicall(bundle);
+    let multicall_tx_call = contracts.exchange_router_contract.multicall(bundle);
 
     // Sign and send the transaction directly using the wallet
     let receipt = multicall_tx_call.send().await?;
