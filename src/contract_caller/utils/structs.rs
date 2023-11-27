@@ -22,16 +22,6 @@ pub struct CreateOrderParamsNumbers {
     pub min_output_amount: U256,
 }
 
-pub struct CreateOrderStruct {
-        addresses: CreateOrderParamsAddresses,
-        numbers: CreateOrderParamsNumbers,
-        order_type: i32,
-        decrease_position_swap_type: i32,
-        is_long: bool,
-        should_unwrap_native_token: bool,
-        referral_code: [u8; 32],
-}
-
 pub struct MarketInfo {
     market: String,
     market_address: String,
