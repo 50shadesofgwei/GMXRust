@@ -25,8 +25,8 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let provider: Provider<Http> = connect_provider().await?;
     let arc_provider: Arc<Provider<Http>> = Arc::new(provider);
     let contracts: Contracts = Contracts::new(arc_provider.clone());
-    let client: SignerMiddleware<Arc<Provider<Http>>, _> = SignerMiddleware::new(arc_provider.clone(), wallet);
-    let chain_id: std::option::Option<ethers::types::U64> = 42161;
+    let client: SignerMiddleware<Arc<Provider<Http>>, _> = SignerMiddleware::new(arc_provider.clone(), wallet.clone());
+    let chain_id: Option<ethers::types::U64> = Some(42161.into());
 
 
 
@@ -170,18 +170,18 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ----------------------------------
 
     let bundle: Vec<Bytes> = vec!(tx0_bytes, tx1_bytes, tx2_bytes, tx3_bytes);
-    let multicall_tx_call = contracts.exchange_router_contract.multicall(bundle);
+    let multicall_tx_call = contracts.exchange_router_contract.multicall(bundle.clone());
 
     let gas_estimate = multicall_tx_call.estimate_gas().await
     .map_err(|e| format!("Error estimating gas: {}", e))?;
     println!("Estimated Gas: {}", gas_estimate);
     let gas_limit = gas_estimate + 100000; // Buffer
     let gas_price: U256 = get_current_gas_price().await?;
-    let nonce = arc_provider.clone().get_transaction_count(wallet.address(), None).await
+    let nonce = arc_provider.clone().get_transaction_count(wallet.clone().address(), None).await
     .map_err(|e| format!("Error fetching nonce: {}", e))?;
 
     // Step 1: Prepare the Transaction Request
-    let tx_data = contracts.exchange_router_contract.multicall(bundle).calldata().unwrap();
+    let tx_data = contracts.exchange_router_contract.multicall(bundle.clone()).calldata().unwrap();
     let tx_request: TransactionRequest = TransactionRequest {
         from: Some(wallet.address()),
         to: Some(NameOrAddress::Address(contracts.exchange_router_contract.address())),
@@ -193,13 +193,28 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
         chain_id
     };
 
-    // Step 2: Convert into TypedTransaction
-    let typed_tx: TypedTransaction = TypedTransaction::Eip1559(tx_request.into());
+    // Step 2: Convert into TypedTransaction + define gas
+    let access_list: Vec<_> = Vec::new();
+    let priority_fee: U256 = U256::from(2000000000);
+    let max_fee_per_gas: U256 = gas_price + priority_fee;
+    let typed_tx: Eip1559TransactionRequest = ethers::types::transaction::eip1559::Eip1559TransactionRequest {
+        from: tx_request.from,
+        to: tx_request.to,
+        nonce: tx_request.nonce,
+        max_priority_fee_per_gas: Some(priority_fee),
+        max_fee_per_gas: Some(max_fee_per_gas),
+        gas: tx_request.gas,
+        value: tx_request.value,
+        data: tx_request.data,
+        access_list: ethers::types::transaction::eip2930::AccessList(access_list),
+        chain_id: tx_request.chain_id,
+    };
+    
+    let typed_tx: TypedTransaction = TypedTransaction::Eip1559(typed_tx);
 
     // Step 3: Sign and Send the Transaction
-    let signed_tx = wallet.sign_transaction(&typed_tx).await?;
-    let pending_tx = client.send_transaction(&signed_tx, None).await?;
-    let receipt = pending_tx.confirmations(1).await?;
+    let pending_tx: PendingTransaction<'_, Http> = client.send_transaction(typed_tx, None).await?;
+    let receipt: Option<TransactionReceipt> = pending_tx.confirmations(1).await?;
 
     println!("Transaction successful, receipt: {:?}", receipt);
 
