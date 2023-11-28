@@ -70,8 +70,8 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
 pub fn get_addresses_for_market_increase_order(input: &SimpleOrder) -> Result<AddressesForMarketIncreaseOrder, Box<dyn std::error::Error>> {
     let wallet = get_local_signer()?;
     let receiver: ethers::types::H160 = wallet.address();
-    let receiver_str = format!("{:?}", receiver);
-    let collateral_token: String = input.collateral_token;
+    let receiver_str: String = format!("{:?}", receiver);
+
 
     println!("Full Address: {}", receiver_str);
     let default_order: OrderObject = OrderObject::default();
@@ -87,7 +87,7 @@ pub fn get_addresses_for_market_increase_order(input: &SimpleOrder) -> Result<Ad
 
 
     Ok(AddressesForMarketIncreaseOrder {
-        receiver: receiver.to_string(),
+        receiver: receiver_str,
         callback_contract: default_order.callback_contract,
         ui_fee_receiver: default_order.ui_fee_receiver,
         market,

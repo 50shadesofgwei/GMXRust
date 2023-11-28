@@ -21,3 +21,4 @@ ethers = "2.0.11"
 lazy_static = "1.4.0"
 serde = { version = "1.0.193", features = ["derive"] }
 reqwest = "0.11.22"
+anyhow = "1.0.75"

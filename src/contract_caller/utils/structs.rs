@@ -275,6 +275,11 @@ impl Token {
             _ => None,
         }
     }
+
+    pub fn token_address_from_name(name: &str) -> Option<String> {
+        Token::from_name(name)
+            .map(|token| token.info().address.to_string())
+    }
 }
 
 pub struct SimpleOrder {
