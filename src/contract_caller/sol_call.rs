@@ -170,7 +170,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     let bundle: Vec<Bytes> = vec!(tx0_bytes, tx1_bytes, tx2_bytes, tx3_bytes);
 
-    let gas_estimate: U256 = U256::from(2500000);
+    let gas_estimate: U256 = U256::from(3000000);
     println!("Estimated Gas: {}", gas_estimate);
     let gas_limit: U256 = gas_estimate + 100000; // Buffer
     let gas_price: U256 = get_current_gas_price().await?;
