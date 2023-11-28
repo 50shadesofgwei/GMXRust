@@ -1,5 +1,6 @@
 use ethers::prelude::*;
-use ethers::types::{H160, Address, U256};
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::{H160, Address, U256, TransactionRequest, NameOrAddress};
 use dotenv::dotenv;
 use anyhow::anyhow;
 use std::str::FromStr;
@@ -20,9 +21,12 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //                      Initialisation
     // ---------------------------------------------------------
 
+    let wallet = get_local_signer()?;
     let provider: Provider<Http> = connect_provider().await?;
     let arc_provider: Arc<Provider<Http>> = Arc::new(provider);
     let contracts: Contracts = Contracts::new(arc_provider.clone());
+    let client: SignerMiddleware<Arc<Provider<Http>>, _> = SignerMiddleware::new(arc_provider.clone(), wallet);
+    let chain_id: std::option::Option<ethers::types::U64> = 42161;
 
 
 
@@ -96,10 +100,6 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
         should_unwrap_native_token: order_object.should_unwrap_native_token,
         referral_code: referral_code_bytes,
     };
-
-
-    // Build local wallet
-    let wallet = get_local_signer()?;
 
 
     // ---------------------------------------------------------
@@ -180,21 +180,40 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let nonce = arc_provider.clone().get_transaction_count(wallet.address(), None).await
     .map_err(|e| format!("Error fetching nonce: {}", e))?;
 
-    let multicall_tx_call = multicall_tx_call
-        .from(wallet.address())
-        .gas(gas_limit)
-        .gas_price(gas_price)
-        .nonce(nonce);
+    // Step 1: Prepare the Transaction Request
+    let tx_data = contracts.exchange_router_contract.multicall(bundle).calldata().unwrap();
+    let tx_request: TransactionRequest = TransactionRequest {
+        from: Some(wallet.address()),
+        to: Some(NameOrAddress::Address(contracts.exchange_router_contract.address())),
+        gas: Some(gas_limit),
+        gas_price: Some(gas_price),
+        nonce: Some(nonce),
+        data: Some(tx_data.into()),
+        value: None,
+        chain_id
+    };
 
-    match multicall_tx_call.send().await {
-        Ok(pending_tx) => {
-            match pending_tx.confirmations(1).await {
-                Ok(receipt) => println!("Transaction successful, receipt: {:?}", receipt),
-                Err(e) => eprintln!("Error fetching transaction receipt: {:?}", e),
-            }
-        },
-        Err(e) => eprintln!("Transaction failed: {:?}", e),
-    }
+    // Step 2: Convert into TypedTransaction
+    let typed_tx: TypedTransaction = TypedTransaction::Eip1559(tx_request.into());
+
+    // Step 3: Sign and Send the Transaction
+    let signed_tx = wallet.sign_transaction(&typed_tx).await?;
+    let pending_tx = client.send_transaction(&signed_tx, None).await?;
+    let receipt = pending_tx.confirmations(1).await?;
+
+    println!("Transaction successful, receipt: {:?}", receipt);
 
     Ok(())
+
+    // match multicall_tx_call.send().await {
+    //     Ok(pending_tx) => {
+    //         match pending_tx.confirmations(1).await {
+    //             Ok(receipt) => println!("Transaction successful, receipt: {:?}", receipt),
+    //             Err(e) => eprintln!("Error fetching transaction receipt: {:?}", e),
+    //         }
+    //     },
+    //     Err(e) => eprintln!("Transaction failed: {:?}", e),
+    // }
+
+    // Ok(())
 }
