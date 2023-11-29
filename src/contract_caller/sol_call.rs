@@ -206,7 +206,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     // Step 2: Convert into TypedTransaction + define gas
     let access_list: Vec<_> = Vec::new();
-    let priority_fee: U256 = U256::from(2000000000);
+    let priority_fee: U256 = U256::from(100000000);
     let max_fee_per_gas: U256 = gas_price + priority_fee;
     let typed_tx: Eip1559TransactionRequest = ethers::types::transaction::eip1559::Eip1559TransactionRequest {
         from: tx_request.from,
@@ -222,7 +222,6 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     };
     
     let typed_tx: TypedTransaction = TypedTransaction::Eip1559(typed_tx);
-    println!("TYPED TX = {:?}", typed_tx);
 
     // Step 3: Sign and Send the Transaction
     let pending_tx: PendingTransaction<'_, Http> = client.send_transaction(typed_tx, None).await?;
