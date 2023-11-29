@@ -1,12 +1,15 @@
 use crate::contract_caller::utils::structs::{TokenPriceFromApiResponse, ApiResponse};
 use reqwest;
 
-pub async fn fetch_token_price(index_token: String) -> Result<TokenPriceFromApiResponse, Box<dyn std::error::Error>> {
+pub async fn fetch_token_price(mut index_token: String) -> Result<TokenPriceFromApiResponse, Box<dyn std::error::Error>> {
     let url: &str = "https://arbitrum-api.gmxinfra.io/signed_prices/latest";
     
     // Get the raw response
     let response = reqwest::get(url).await?;
     let response_text = response.text().await?;
+    if index_token == "WBTC" {
+        index_token = "WBTC.b".to_string();
+    }
 
     // Deserialize the response text to ApiResponse
     let response_json: ApiResponse = serde_json::from_str(&response_text)?;

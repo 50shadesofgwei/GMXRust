@@ -18,10 +18,6 @@ abigen!{
     GAS_UTILS, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/gas_utils_abi.json";
 }
 
-abigen!{
-    READER, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/reader_abi.json";
-}
-
 pub struct Contracts {
     pub usdc_contract: USDC_NATIVE<Provider<Http>>,
     pub dai_contract: DAI<Provider<Http>>,
@@ -37,7 +33,7 @@ pub struct Contracts {
     pub order_vault_contract: ORDER_VAULT<Provider<Http>>,
     pub deposit_vault_contract: DEPOSIT_VAULT<Provider<Http>>,
     pub gas_contract: GAS_UTILS<Provider<Http>>,
-    pub reader_contract: READER<Provider<Http>>
+    // pub reader_contract: READER<Provider<Http>>
 }
 
 impl Contracts {
@@ -57,7 +53,7 @@ impl Contracts {
             order_vault_contract: ORDER_VAULT::<Provider<Http>>::new("0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".parse::<H160>().unwrap(), provider.clone()),
             deposit_vault_contract: DEPOSIT_VAULT::<Provider<Http>>::new("0xF89e77e8Dc11691C9e8757e84aaFbCD8A67d7A55".parse::<H160>().unwrap(), provider.clone()),
             gas_contract: GAS_UTILS::<Provider<Http>>::new("0x6Ee83F82757C5B10468855753F5374FFF826BDCB".parse::<H160>().unwrap(), provider.clone()),
-            reader_contract: READER::<Provider<Http>>::new("0xf60becbba223eea9495da3f606753867ec10d139".parse::<H160>().unwrap(), provider.clone()),
+            // reader_contract: READER::<Provider<Http>>::new("0xf60becbba223eea9495da3f606753867ec10d139".parse::<H160>().unwrap(), provider.clone()),
         }
     }
 

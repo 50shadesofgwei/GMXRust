@@ -32,20 +32,28 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // Parse number values to U256
     let amount_u256: U256 = U256::from_dec_str(&order_object.amount)
     .map_err(|e| format!("Error parsing amount to U256: {}", e))?;
-    let size_delta_usd = order_object.size_delta_usd.parse()
+
+    let size_delta_usd: U256 = U256::from_dec_str(&order_object.size_delta_usd)
         .map_err(|e| format!("Error parsing size_delta_usd to U256: {}", e))?;
-    let initial_collateral_delta_amount = order_object.initial_collateral_delta_amount.parse()
+
+    let initial_collateral_delta_amount: U256 = U256::from_dec_str(&order_object.initial_collateral_delta_amount)
         .map_err(|e| format!("Error parsing initial_collateral_delta_amount to U256: {}", e))?;
-    let trigger_price = order_object.trigger_price.parse()
+
+    let trigger_price: U256 = U256::from_dec_str(&order_object.trigger_price)
         .map_err(|e| format!("Error parsing trigger_price to U256: {}", e))?;
-    let acceptable_price = order_object.acceptable_price.parse()
+
+    let acceptable_price: U256 = U256::from_dec_str(&order_object.acceptable_price)
         .map_err(|e| format!("Error parsing acceptable_price to U256: {}", e))?;
-    let execution_fee = order_object.execution_fee.parse()
+
+    let execution_fee: U256 = U256::from_dec_str(&order_object.execution_fee)
         .map_err(|e| format!("Error parsing execution_fee to U256: {}", e))?;
-    let callback_gas_limit = order_object.callback_gas_limit.parse()
+
+    let callback_gas_limit: U256 = U256::from_dec_str(&order_object.callback_gas_limit)
         .map_err(|e| format!("Error parsing callback_gas_limit to U256: {}", e))?;
-    let min_output_amount = order_object.min_output_amount.parse()
+
+    let min_output_amount: U256 = U256::from_dec_str(&order_object.min_output_amount)
         .map_err(|e| format!("Error parsing min_output_amount to U256: {}", e))?;
+
 
     // Parse addresses with error handling
     let receiver = order_object.receiver.parse()
@@ -139,6 +147,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ----------------------------------
 
     let weth_amount: U256 = execution_fee;
+    println!("EXECUTION FEE = {}", weth_amount);
 
     // Encode the sendWnt transaction calldata
     let tx1_builder = contracts.exchange_router_contract.send_wnt(order_vault_contract_address, weth_amount);
@@ -174,9 +183,10 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
 
-    let gas_estimate: U256 = U256::from(2500000);
+    let gas_estimate: U256 = U256::from(4000000);
     println!("Estimated Gas: {}", gas_estimate);
     let gas_limit: U256 = gas_estimate + 100000; // Buffer
+    println!("GAS LIMIT = {}", gas_limit);
     let gas_price: U256 = get_current_gas_price().await?;
     let nonce: U256 = arc_provider.clone().get_transaction_count(wallet.clone().address(), None).await
     .map_err(|e| format!("Error fetching nonce: {}", e))?;
@@ -212,6 +222,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     };
     
     let typed_tx: TypedTransaction = TypedTransaction::Eip1559(typed_tx);
+    println!("TYPED TX = {:?}", typed_tx);
 
     // Step 3: Sign and Send the Transaction
     let pending_tx: PendingTransaction<'_, Http> = client.send_transaction(typed_tx, None).await?;
