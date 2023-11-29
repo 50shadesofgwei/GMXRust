@@ -28,6 +28,8 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
     let collateral_price: U256 = U256::from_dec_str(&collateral_price_output.min_price_full)?;
     let collateral_amount_raw: U256 = U256::from_dec_str(&input.collateral_amount)?;
     println!("Collateral Amount: {}", &input.collateral_amount);
+    println!("Collateral Amount RAW: {}", collateral_amount_raw);
+
     
     // Calculate the USD value of the collateral
     let actual_usd_value: U256 = collateral_amount_raw
@@ -89,6 +91,7 @@ pub fn create_full_order_object(
     calc_output: MarketIncreaseOrderCalcOutput,
 ) -> Result<OrderObject, Box<dyn std::error::Error>> {
     let referral_code: String = address_data.referral_code;
+    println!("TESTING: COLLATERAL AMOUNT = {}", calc_output.collateral_amount.to_string());
 
     Ok(OrderObject {
         is_long: calc_output.is_long,

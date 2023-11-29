@@ -30,7 +30,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
 
     // Parse number values to U256
-    let amount_u256 = order_object.amount.parse()
+    let amount_u256: U256 = U256::from_dec_str(&order_object.amount)
     .map_err(|e| format!("Error parsing amount to U256: {}", e))?;
     let size_delta_usd = order_object.size_delta_usd.parse()
         .map_err(|e| format!("Error parsing size_delta_usd to U256: {}", e))?;
@@ -112,7 +112,8 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ----------------------------------
 
     let exchange_router_address: H160 = contracts.exchange_router_contract.address();
-    let vault_contract_address: H160 = contracts.vault_contract.address();
+    let deposit_vault_contract_address: H160 = contracts.deposit_vault_contract.address();
+    let order_vault_contract_address: H160 = contracts.order_vault_contract.address();
     let double_check: Option<String> = Token::token_address_from_name(order_object.initial_collateral_token.as_str());
     println!("TESTING: TOKEN ADDRESS {:?}", double_check);
     // let tx0_builder = match order_object.initial_collateral_token.as_str() {
@@ -140,7 +141,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let weth_amount: U256 = execution_fee;
 
     // Encode the sendWnt transaction calldata
-    let tx1_builder = contracts.exchange_router_contract.send_wnt(vault_contract_address, weth_amount);
+    let tx1_builder = contracts.exchange_router_contract.send_wnt(order_vault_contract_address, weth_amount);
     let tx1_bytes: Bytes = tx1_builder.calldata()
     .ok_or_else(|| anyhow!("Failed to build tx0 calldata"))?;
 
@@ -150,7 +151,8 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //         Tx2: Vault Deposit
     // ----------------------------------
 
-    let tx2_builder = contracts.exchange_router_contract.send_tokens(initial_collateral_token, vault_contract_address, amount_u256);
+    let tx2_builder = contracts.exchange_router_contract.send_tokens(initial_collateral_token, order_vault_contract_address, amount_u256);
+    println!("TEST: AMOUNT_U256 = {}", amount_u256);
     let tx2_bytes: Bytes = tx2_builder.calldata()
     .ok_or_else(|| anyhow!("Failed to build tx0 calldata"))?;
 
@@ -172,7 +174,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
 
-    let gas_estimate: U256 = U256::from(2500000);
+    let gas_estimate: U256 = U256::from(2000000);
     println!("Estimated Gas: {}", gas_estimate);
     let gas_limit: U256 = gas_estimate + 100000; // Buffer
     let gas_price: U256 = get_current_gas_price().await?;

@@ -4,7 +4,8 @@ use std::sync::Arc;
 abigen!{ 
     EXCHANGE_ROUTER, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/exchange_router_abi.json";
     USDC_NATIVE, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/usdc_arb_native_abi.json";
-    VAULT, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/vault_abi.json";
+    ORDER_VAULT, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/order_vault_abi.json";
+    DEPOSIT_VAULT, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/deposit_vault_abi.json";
     WETH, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/weth_abi.json";
     DAI, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/dai_abi.json";
     ARB, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/arb_abi.json";
@@ -14,6 +15,7 @@ abigen!{
     USDT, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/usdt_abi.json";
     WBTC, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/wbtc_abi.json";
     SOL, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/wsol_abi.json";
+    GAS_UTILS, "/Users/jfeasby/GMX Rust/GMX_Rust/src/contract_caller/abis/gas_utils_abi.json";
 }
 
 pub struct Contracts {
@@ -28,7 +30,9 @@ pub struct Contracts {
     pub usdt_contract: USDT<Provider<Http>>,
     pub usdce_contract: USDCE<Provider<Http>>,
     pub exchange_router_contract: EXCHANGE_ROUTER<Provider<Http>>,
-    pub vault_contract: VAULT<Provider<Http>>,
+    pub order_vault_contract: ORDER_VAULT<Provider<Http>>,
+    pub deposit_vault_contract: DEPOSIT_VAULT<Provider<Http>>,
+    pub gas_contract: GAS_UTILS<Provider<Http>>
 }
 
 impl Contracts {
@@ -45,7 +49,9 @@ impl Contracts {
             usdt_contract: USDT::<Provider<Http>>::new("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9".parse::<H160>().unwrap(), provider.clone()),
             usdce_contract: USDCE::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
             exchange_router_contract: EXCHANGE_ROUTER::<Provider<Http>>::new("0x7C68C7866A64FA2160F78EEaE12217FFbf871fa8".parse::<H160>().unwrap(), provider.clone()),
-            vault_contract: VAULT::<Provider<Http>>::new("0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".parse::<H160>().unwrap(), provider.clone()),
+            order_vault_contract: ORDER_VAULT::<Provider<Http>>::new("0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".parse::<H160>().unwrap(), provider.clone()),
+            deposit_vault_contract: DEPOSIT_VAULT::<Provider<Http>>::new("0xF89e77e8Dc11691C9e8757e84aaFbCD8A67d7A55".parse::<H160>().unwrap(), provider.clone()),
+            gas_contract: GAS_UTILS::<Provider<Http>>::new("0x6Ee83F82757C5B10468855753F5374FFF826BDCB".parse::<H160>().unwrap(), provider.clone()),
         }
     }
 

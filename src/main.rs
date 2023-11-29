@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let test: SimpleOrder = SimpleOrder {
         is_long: true,
         collateral_token: "USDC".to_string(),
-        collateral_amount: "5000000".to_string(),
+        collateral_amount: "1000000".to_string(),
         index_token: "ETH".to_string(),
         leverage_factor: 10.0,
     };
