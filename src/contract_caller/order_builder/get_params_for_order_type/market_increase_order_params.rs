@@ -17,11 +17,8 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
     let initial_collateral_delta_amount: U256 = U256::from(0);
     let trigger_price: U256 = U256::from(0);
     let min_output_amount: U256 = U256::from(0);
-
-    let estimated_gas: u64 = 2500000;
+    let estimated_gas: u64 = 50000;
     let is_long: bool = input.is_long;
-
-    println!("Fetching token information...");
     let collateral_info: TokenInfo = Token::from_name(&input.collateral_token)
         .ok_or("Unsupported token")?
         .info();
@@ -29,32 +26,22 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
     // Fetch the current price of the collateral token in USD
     let collateral_price_output = fetch_token_price(input.collateral_token.clone()).await?;
     let collateral_price: U256 = U256::from_dec_str(&collateral_price_output.min_price_full)?;
-
-    println!("Converting and adjusting collateral amount...");
     let collateral_amount_raw: U256 = U256::from_dec_str(&input.collateral_amount)?;
+    println!("Collateral Amount: {}", &input.collateral_amount);
     
     // Calculate the USD value of the collateral
     let actual_usd_value: U256 = collateral_amount_raw
     .checked_div(U256::exp10(collateral_info.decimals as usize))
     .ok_or("Conversion to USD value error")?;
-
-    println!("Fetching and adjusting prices...");
     let price_output = fetch_token_price(input.index_token.clone()).await?;
-
-    println!("Calculating acceptable price...");
     let acceptable_price: U256 = U256::from_dec_str(&price_output.min_price_full)?;
-
-    println!("Applying leverage factor and adjusting for USD amount...");
     let leverage_as_u256: U256 = U256::from(input.leverage_factor as u64);
     let leveraged_usd_value: U256 = actual_usd_value.checked_mul(leverage_as_u256)
         .ok_or("Leverage application error")?;
     let size_delta_usd: U256 = leveraged_usd_value.checked_mul(U256::exp10(USD_SCALE_FACTOR as usize))
         .ok_or("Final USD scaling error")?;
+    let execution_fee: U256 = calculate_execution_fee(estimated_gas).await?;
 
-    println!("Calculating execution fee...");
-    let execution_fee = calculate_execution_fee(estimated_gas).await?;
-
-    println!("Returning calculated order parameters...");
     Ok(MarketIncreaseOrderCalcOutput {
         is_long,
         collateral_amount: collateral_amount_raw, 

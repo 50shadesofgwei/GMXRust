@@ -113,23 +113,25 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
 
     let exchange_router_address: H160 = contracts.exchange_router_contract.address();
     let vault_contract_address: H160 = contracts.vault_contract.address();
-    let tx0_builder = match order_object.initial_collateral_token.as_str() {
-        "USDC" => contracts.usdc_contract.approve(exchange_router_address, amount_u256),
-        "DAI" => contracts.dai_contract.approve(exchange_router_address, amount_u256),
-        "WETH" => contracts.weth_contract.approve(exchange_router_address, amount_u256),
-        "WBTC" => contracts.wbtc_contract.approve(exchange_router_address, amount_u256),
-        "LINK" => contracts.link_contract.approve(exchange_router_address, amount_u256),
-        "ARB" => contracts.arb_contract.approve(exchange_router_address, amount_u256),
-        "UNI" => contracts.uni_contract.approve(exchange_router_address, amount_u256),
-        "SOL" => contracts.sol_contract.approve(exchange_router_address, amount_u256),
-        "USDT" => contracts.usdt_contract.approve(exchange_router_address, amount_u256),
-        "USDCE" => contracts.usdce_contract.approve(exchange_router_address, amount_u256),
-        _ => return Err("Unsupported collateral token".into()),
-    };
-    let tx0_bytes: Bytes = tx0_builder.calldata()
-    .ok_or_else(|| anyhow!("Failed to build tx0 calldata"))?;
+    let double_check: Option<String> = Token::token_address_from_name(order_object.initial_collateral_token.as_str());
+    println!("TESTING: TOKEN ADDRESS {:?}", double_check);
+    // let tx0_builder = match order_object.initial_collateral_token.as_str() {
+    //     "USDC" => contracts.usdc_contract.approve(exchange_router_address, amount_u256),
+    //     "DAI" => contracts.dai_contract.approve(exchange_router_address, amount_u256),
+    //     "WETH" => contracts.weth_contract.approve(exchange_router_address, amount_u256),
+    //     "WBTC" => contracts.wbtc_contract.approve(exchange_router_address, amount_u256),
+    //     "LINK" => contracts.link_contract.approve(exchange_router_address, amount_u256),
+    //     "ARB" => contracts.arb_contract.approve(exchange_router_address, amount_u256),
+    //     "UNI" => contracts.uni_contract.approve(exchange_router_address, amount_u256),
+    //     "SOL" => contracts.sol_contract.approve(exchange_router_address, amount_u256),
+    //     "USDT" => contracts.usdt_contract.approve(exchange_router_address, amount_u256),
+    //     "USDCE" => contracts.usdce_contract.approve(exchange_router_address, amount_u256),
+    //     _ => return Err("Unsupported collateral token".into()),
+    // };
+    // let tx0_bytes: Bytes = tx0_builder.calldata()
+    // .ok_or_else(|| anyhow!("Failed to build tx0 calldata"))?;
 
-    println!("tx0 ok");
+    // println!("tx0 ok");
 
     // ----------------------------------
     //            Tx1: Send Gas
@@ -168,9 +170,9 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //      Bundling & Tx Execution 
     // ----------------------------------
 
-    let bundle: Vec<Bytes> = vec!(tx0_bytes, tx1_bytes, tx2_bytes, tx3_bytes);
+    let bundle: Vec<Bytes> = vec!(tx1_bytes, tx2_bytes, tx3_bytes);
 
-    let gas_estimate: U256 = U256::from(3000000);
+    let gas_estimate: U256 = U256::from(2500000);
     println!("Estimated Gas: {}", gas_estimate);
     let gas_limit: U256 = gas_estimate + 100000; // Buffer
     let gas_price: U256 = get_current_gas_price().await?;
@@ -186,7 +188,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
         gas_price: Some(gas_price),
         nonce: Some(nonce),
         data: Some(tx_data.into()),
-        value: None,
+        value: execution_fee.into(),
         chain_id: Some(42161.into())
     };
 
@@ -216,16 +218,4 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     println!("Transaction successful, receipt: {:?}", receipt);
 
     Ok(())
-
-    // match multicall_tx_call.send().await {
-    //     Ok(pending_tx) => {
-    //         match pending_tx.confirmations(1).await {
-    //             Ok(receipt) => println!("Transaction successful, receipt: {:?}", receipt),
-    //             Err(e) => eprintln!("Error fetching transaction receipt: {:?}", e),
-    //         }
-    //     },
-    //     Err(e) => eprintln!("Transaction failed: {:?}", e),
-    // }
-
-    // Ok(())
 }

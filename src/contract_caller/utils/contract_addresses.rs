@@ -44,8 +44,8 @@ impl Contracts {
             sol_contract: SOL::<Provider<Http>>::new("0x53B56de645B9de6e5a40acE047D1c74E8B42Eccb".parse::<H160>().unwrap(), provider.clone()),
             usdt_contract: USDT::<Provider<Http>>::new("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9".parse::<H160>().unwrap(), provider.clone()),
             usdce_contract: USDCE::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
-            exchange_router_contract: EXCHANGE_ROUTER::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
-            vault_contract: VAULT::<Provider<Http>>::new("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8".parse::<H160>().unwrap(), provider.clone()),
+            exchange_router_contract: EXCHANGE_ROUTER::<Provider<Http>>::new("0x7C68C7866A64FA2160F78EEaE12217FFbf871fa8".parse::<H160>().unwrap(), provider.clone()),
+            vault_contract: VAULT::<Provider<Http>>::new("0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5".parse::<H160>().unwrap(), provider.clone()),
         }
     }
 
