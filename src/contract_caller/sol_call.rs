@@ -120,27 +120,60 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     // ----------------------------------
 
     let exchange_router_address: H160 = contracts.exchange_router_contract.address();
-    let deposit_vault_contract_address: H160 = contracts.deposit_vault_contract.address();
     let order_vault_contract_address: H160 = contracts.order_vault_contract.address();
-    let double_check: Option<String> = Token::token_address_from_name(order_object.initial_collateral_token.as_str());
+    let router_contract_str: &str = "0x7452c558d45f8afc8c83dae62c3f8a5be19c71f6";
+    let router_contract: H160 = router_contract_str.parse().expect("Invalid H160 address");
+    let mut approval_contract: H160;
+    let double_check: Option<String> = Token::token_address_from_name(&order_object.initial_collateral_token);
     println!("TESTING: TOKEN ADDRESS {:?}", double_check);
-    // let tx0_builder = match order_object.initial_collateral_token.as_str() {
-    //     "USDC" => contracts.usdc_contract.approve(exchange_router_address, amount_u256),
-    //     "DAI" => contracts.dai_contract.approve(exchange_router_address, amount_u256),
-    //     "WETH" => contracts.weth_contract.approve(exchange_router_address, amount_u256),
-    //     "WBTC" => contracts.wbtc_contract.approve(exchange_router_address, amount_u256),
-    //     "LINK" => contracts.link_contract.approve(exchange_router_address, amount_u256),
-    //     "ARB" => contracts.arb_contract.approve(exchange_router_address, amount_u256),
-    //     "UNI" => contracts.uni_contract.approve(exchange_router_address, amount_u256),
-    //     "SOL" => contracts.sol_contract.approve(exchange_router_address, amount_u256),
-    //     "USDT" => contracts.usdt_contract.approve(exchange_router_address, amount_u256),
-    //     "USDCE" => contracts.usdce_contract.approve(exchange_router_address, amount_u256),
-    //     _ => return Err("Unsupported collateral token".into()),
-    // };
-    // let tx0_bytes: Bytes = tx0_builder.calldata()
-    // .ok_or_else(|| anyhow!("Failed to build tx0 calldata"))?;
+    let tx0_builder = match order_object.initial_collateral_token.as_str() {
+        "USDC" => {
+            approval_contract = contracts.usdc_contract.address();
+            contracts.usdc_contract.approve(exchange_router_address, amount_u256)
+        },
+        "DAI" => {
+            approval_contract = contracts.dai_contract.address();
+            contracts.dai_contract.approve(exchange_router_address, amount_u256)
+        },
+        "ETH" => {
+            approval_contract = contracts.weth_contract.address();
+            contracts.weth_contract.approve(router_contract, amount_u256)
+        },
+        "WBTC" => {
+            approval_contract = contracts.wbtc_contract.address();
+            contracts.wbtc_contract.approve(exchange_router_address, amount_u256)
+        },
+        "LINK" => {
+            approval_contract = contracts.link_contract.address();
+            contracts.link_contract.approve(exchange_router_address, amount_u256)
+        },
+        "ARB" => {
+            approval_contract = contracts.arb_contract.address();
+            contracts.arb_contract.approve(exchange_router_address, amount_u256)
+        },
+        "UNI" => {
+            approval_contract = contracts.uni_contract.address();
+            contracts.uni_contract.approve(exchange_router_address, amount_u256)
+        },
+        "SOL" => {
+            approval_contract = contracts.sol_contract.address();
+            contracts.sol_contract.approve(exchange_router_address, amount_u256)
+        },
+        "USDT" => {
+            approval_contract = contracts.usdt_contract.address();
+            contracts.usdt_contract.approve(exchange_router_address, amount_u256)
+        },
+        "USDCE" => {
+            approval_contract = contracts.usdce_contract.address();
+            contracts.usdce_contract.approve(exchange_router_address, amount_u256)
+        },
+        _ => return Err("Unsupported collateral token".into()),
+    };
 
-    // println!("tx0 ok");
+    let tx0_bytes: Bytes = tx0_builder.calldata()
+    .ok_or_else(|| anyhow!("Failed to build tx0 calldata"))?;
+
+    println!("tx0 ok");
 
     // ----------------------------------
     //            Tx1: Send Gas
@@ -178,6 +211,48 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     println!("tx3 ok");
 
     // ----------------------------------
+    //            Approval Tx
+    // ----------------------------------
+
+    let approval_gas: U256 = U256::from(1500000);
+    let gas_price: U256 = get_current_gas_price().await?;
+    let approval_nonce: U256 = arc_provider.clone().get_transaction_count(wallet.clone().address(), None).await
+    .map_err(|e| format!("Error fetching nonce: {}", e))?;
+    let approval_tx_request: TransactionRequest = TransactionRequest {
+        from: Some(wallet.address()),
+        to: Some(NameOrAddress::Address(approval_contract)),
+        gas: Some(approval_gas),
+        gas_price: Some(gas_price),
+        nonce: Some(approval_nonce),
+        data: Some(tx0_bytes.into()),
+        value: Some(0.into()),
+        chain_id: Some(42161.into())
+    };
+
+    let access_list: Vec<_> = Vec::new();
+    let priority_fee: U256 = U256::from(100000000);
+    let max_fee_per_gas: U256 = gas_price + priority_fee;
+    let typed_approval_tx: Eip1559TransactionRequest = ethers::types::transaction::eip1559::Eip1559TransactionRequest {
+        from: approval_tx_request.from,
+        to: approval_tx_request.to,
+        nonce: approval_tx_request.nonce,
+        max_priority_fee_per_gas: Some(priority_fee),
+        max_fee_per_gas: Some(max_fee_per_gas),
+        gas: approval_tx_request.gas,
+        value: approval_tx_request.value,
+        data: approval_tx_request.data,
+        access_list: ethers::types::transaction::eip2930::AccessList(access_list.clone()),
+        chain_id: approval_tx_request.chain_id,
+    };
+    
+    let typed_approval_tx: TypedTransaction = TypedTransaction::Eip1559(typed_approval_tx);
+    let pending_approval_tx: PendingTransaction<'_, Http> = client.send_transaction(typed_approval_tx, None).await?;
+    let receipt: Option<TransactionReceipt> = pending_approval_tx.confirmations(1).await?;
+
+    println!("Approval Tx submitted to network. receipt: {:?}", receipt);
+
+
+    // ----------------------------------
     //      Bundling & Tx Execution 
     // ----------------------------------
 
@@ -187,7 +262,6 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     println!("Estimated Gas: {}", gas_estimate);
     let gas_limit: U256 = gas_estimate + 100000; // Buffer
     println!("GAS LIMIT = {}", gas_limit);
-    let gas_price: U256 = get_current_gas_price().await?;
     let nonce: U256 = arc_provider.clone().get_transaction_count(wallet.clone().address(), None).await
     .map_err(|e| format!("Error fetching nonce: {}", e))?;
 
@@ -205,8 +279,6 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     };
 
     // Step 2: Convert into TypedTransaction + define gas
-    let access_list: Vec<_> = Vec::new();
-    let priority_fee: U256 = U256::from(100000000);
     let max_fee_per_gas: U256 = gas_price + priority_fee;
     let typed_tx: Eip1559TransactionRequest = ethers::types::transaction::eip1559::Eip1559TransactionRequest {
         from: tx_request.from,
@@ -217,7 +289,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
         gas: tx_request.gas,
         value: tx_request.value,
         data: tx_request.data,
-        access_list: ethers::types::transaction::eip2930::AccessList(access_list),
+        access_list: ethers::types::transaction::eip2930::AccessList(access_list.clone()),
         chain_id: tx_request.chain_id,
     };
     
@@ -227,7 +299,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     let pending_tx: PendingTransaction<'_, Http> = client.send_transaction(typed_tx, None).await?;
     let receipt: Option<TransactionReceipt> = pending_tx.confirmations(1).await?;
 
-    println!("Transaction successful, receipt: {:?}", receipt);
+    println!("Order Tx submitted to network, receipt: {:?}", receipt);
 
     Ok(())
 }

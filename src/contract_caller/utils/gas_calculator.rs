@@ -1,6 +1,6 @@
 use reqwest;
 use ethers::core::types::U256;
-use super::{structs::GasPriceResponse, contract_addresses::Contracts};
+use super::{structs::GasPriceResponse};
 use std::env;
 
 pub async fn calculate_execution_fee(gas_estimate: u64) -> Result<U256, Box<dyn std::error::Error>> {
@@ -54,8 +54,3 @@ pub async fn get_current_gas_price() -> Result<U256, Box<dyn std::error::Error>>
 
     Ok(gas_price_wei)
 }
-
-// pub fn get_deposit_gas_limit(contracts: Contracts) {
-//     contracts.gas_contract.
-
-// }
