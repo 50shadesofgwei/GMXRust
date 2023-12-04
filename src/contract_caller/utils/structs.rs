@@ -290,6 +290,13 @@ pub struct SimpleOrder {
     pub leverage_factor: f32,
 }
 
+pub struct SimpleClosePosition {
+    pub reciever: String,
+    pub index_token: String,
+    pub collateral_token: String,
+
+}
+
 #[derive(Debug)]
 pub struct MarketIncreaseOrderCalcOutput {
     pub is_long: bool,
@@ -299,6 +306,17 @@ pub struct MarketIncreaseOrderCalcOutput {
     pub trigger_price: U256,
     pub acceptable_price: U256,
     pub execution_fee: U256,
+    pub min_output_amount: U256,
+}
+
+#[derive(Debug)]
+pub struct MarketDecreaseOrderCalcOutput {
+    pub size_delta_usd: U256,
+    pub initial_collateral_delta_amount: U256,
+    pub trigger_price: U256,
+    pub acceptable_price: U256,
+    pub execution_fee: U256,
+    pub callback_gas_limit: U256,
     pub min_output_amount: U256,
 }
 
