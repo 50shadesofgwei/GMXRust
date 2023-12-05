@@ -22,4 +22,5 @@ pub async fn calculate_market_decrease_order_params(input: &SimpleClosePosition)
     .ok_or("Conversion to USD value error")?;
     let price_output = fetch_token_price(input.index_token.clone()).await?;
     let acceptable_price: U256 = U256::from_dec_str(&price_output.min_price_full)?;
+    
 }
