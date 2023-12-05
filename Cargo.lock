@@ -1599,6 +1599,7 @@ dependencies = [
  "dotenv",
  "ethers",
  "fs",
+ "hex",
  "lazy_static",
  "reqwest",
  "serde",

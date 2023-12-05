@@ -1,5 +1,4 @@
-use ethers::abi::{AbiEncode, Token};
-use ethers::types::Bytes;
+use ethers::abi::Token;
 use ethers::utils::keccak256;
 
 pub fn encode_data(data_types: Vec<&str>, data_values: Vec<Token>) -> String {
