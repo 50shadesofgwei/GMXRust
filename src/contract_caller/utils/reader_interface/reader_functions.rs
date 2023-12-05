@@ -14,3 +14,4 @@ pub fn get_position_key(account: H160, market: H160, collateral_token: H160, is_
     // Convert hex string to H256
     H256::from_slice(&hex::decode(hash_hex).expect("Invalid hex string"))
 }
+
