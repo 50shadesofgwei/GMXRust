@@ -214,7 +214,7 @@ pub async fn sol_call(order_object: OrderObject) -> Result<(), Box<dyn std::erro
     //            Approval Tx
     // ----------------------------------
 
-    let approval_gas: U256 = U256::from(1500000);
+    let approval_gas: U256 = U256::from(2000000);
     let gas_price: U256 = get_current_gas_price().await?;
     let approval_nonce: U256 = arc_provider.clone().get_transaction_count(wallet.clone().address(), None).await
     .map_err(|e| format!("Error fetching nonce: {}", e))?;

@@ -17,7 +17,7 @@ pub async fn calculate_market_increase_order_params(input: &SimpleOrder) -> Resu
     let initial_collateral_delta_amount: U256 = U256::from(0);
     let trigger_price: U256 = U256::from(0);
     let min_output_amount: U256 = U256::from(0);
-    let estimated_gas: u64 = 3000000000000000;
+    let estimated_gas: u64 = 5000000000000000;
     let estimated_gas_u256: U256 = U256::from(estimated_gas);
     let is_long: bool = input.is_long;
     let collateral_info: TokenInfo = Token::from_name(&input.collateral_token)

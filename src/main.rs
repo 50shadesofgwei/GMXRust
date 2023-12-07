@@ -16,8 +16,6 @@ use ethers::prelude::LocalWallet;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
-    let test = api_caller().await?;
-
     // let address_str: &str = "0xa6D1FEda6fc70680816eF6A23faf5e454e2f9C09";
     // let address: H160 = address_str.parse().expect("Invalid H160 address");
     // let market_str: &str = "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336";
@@ -36,18 +34,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // println!("Test Key Result = {}", test_hash_str);
 
-    // let test: SimpleOrder = SimpleOrder {
-    //     is_long: true,
-    //     collateral_token: "ETH".to_string(),
-    //     collateral_amount: "2053551709838329".to_string(),
-    //     index_token: "WBTC".to_string(),
-    //     leverage_factor: 10.0,
-    // };
+    let test: SimpleOrder = SimpleOrder {
+        is_long: true,
+        collateral_token: "ETH".to_string(),
+        collateral_amount: "2053551709838329".to_string(),
+        index_token: "WBTC".to_string(),
+        leverage_factor: 10.0,
+    };
 
-    // let test_result: OrderObject = get_order_object_from_simple_order(&test).await?;
-    // let receipt = sol_call(test_result).await?;
+    let test_result: OrderObject = get_order_object_from_simple_order(&test).await?;
+    let receipt = sol_call(test_result).await?;
 
-    // println!("{:?}", receipt);
+    println!("{:?}", receipt);
 
     Ok(())
 }
