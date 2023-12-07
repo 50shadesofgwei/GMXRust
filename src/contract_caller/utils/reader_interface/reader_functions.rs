@@ -1,5 +1,6 @@
 use ethers::abi::Token;
 use ethers::types::{Address, H160, H256};
+use crate::contract_caller::utils::hash_utils::hash_data;
 
 pub fn get_position_key(account: H160, market: H160, collateral_token: H160, is_long: bool) -> H256 {
     let data_values = vec![

@@ -527,7 +527,7 @@ pub struct KeyHashes {
 
 impl KeyHashes {
     pub fn new() -> Self {
-        HashedStrings {
+        KeyHashes {
             wnt: hash_string("WNT"),
             nonce: hash_string("NONCE"),
             fee_receiver: hash_string("FEE_RECEIVER"),
